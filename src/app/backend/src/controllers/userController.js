@@ -1,5 +1,15 @@
 const users = require('../queries/users');
+const { userToClient } = require('../utils/normalize');
 const { createError } = require('../utils/errors');
+
+async function lookupByEmail(req, res) {
+  const email = String(req.query.email || '').trim();
+  if (!email) throw createError('Email query parameter is required', 400);
+  const row = await users.findUserByEmail(email);
+  if (!row) throw createError('No user found with this email address', 404);
+  if (row.id === req.user.id) throw createError('You cannot start a thread with yourself', 400);
+  res.json({ user: userToClient(row) });
+}
 
 async function updateProfile(req, res) {
   const user = await users.updateUserProfile(req.user.id, req.body);
@@ -28,4 +38,4 @@ async function uploadAvatar(req, res) {
   res.json({ message: 'Avatar uploaded successfully', user });
 }
 
-module.exports = { updateProfile, getProfile, searchFreelancers, uploadAvatar };
+module.exports = { lookupByEmail, updateProfile, getProfile, searchFreelancers, uploadAvatar };

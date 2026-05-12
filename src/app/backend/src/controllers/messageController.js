@@ -1,6 +1,13 @@
 const { query, withTransaction } = require('../database/db');
 const { createError } = require('../utils/errors');
 
+function normalizeName(s) {
+  return String(s || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+}
+
 async function getOrCreateConversation(userA, userB) {
   const existing = await query(
     `select cp1.conversation_id id from conversation_participants cp1
@@ -17,22 +24,46 @@ async function getOrCreateConversation(userA, userB) {
 }
 
 async function sendMessage(req, res) {
-  if (req.user.id === req.body.receiverId) throw createError('Cannot send message to yourself', 400);
-  const receiver = await query('select id from users where id = $1', [req.body.receiverId]);
+  let receiverId = req.body.receiverId;
+
+  if (req.body.receiverEmail) {
+    const email = String(req.body.receiverEmail).trim();
+    const found = await query(
+      `select id, name, email from users where lower(email) = lower($1)`,
+      [email]
+    );
+    if (!found.rowCount) throw createError('No account exists with this email address', 404);
+    const recipient = found.rows[0];
+    if (recipient.id === req.user.id) throw createError('Cannot send message to yourself', 400);
+    const given = normalizeName(req.body.recipientName);
+    const registered = normalizeName(recipient.name);
+    if (!given || given !== registered) {
+      throw createError(
+        'Recipient name does not match this email account. Use the full name on their Workzy profile.',
+        400
+      );
+    }
+    receiverId = recipient.id;
+  }
+
+  if (!receiverId) throw createError('Receiver is required', 400);
+  if (req.user.id === receiverId) throw createError('Cannot send message to yourself', 400);
+
+  const receiver = await query('select id from users where id = $1', [receiverId]);
   if (!receiver.rowCount) throw createError('Receiver not found', 404);
-  const conversationId = await getOrCreateConversation(req.user.id, req.body.receiverId);
+  const conversationId = await getOrCreateConversation(req.user.id, receiverId);
   const result = await query(
     `insert into messages (conversation_id, sender_id, receiver_id, content) values ($1,$2,$3,$4) returning *`,
-    [conversationId, req.user.id, req.body.receiverId, req.body.content]
+    [conversationId, req.user.id, receiverId, req.body.content]
   );
   await query(`update conversations set last_message = $1, last_message_at = now() where id = $2`, [req.body.content, conversationId]);
-  req.app.get('io')?.to(`user_${req.body.receiverId}`).emit('message_received', result.rows[0]);
+  req.app.get('io')?.to(`user_${receiverId}`).emit('message_received', result.rows[0]);
   res.status(201).json({ message: 'Message sent successfully', data: result.rows[0] });
 }
 
 async function conversations(req, res) {
   const result = await query(
-    `select c.*, json_agg(json_build_object('id', u.id, 'name', u.name, 'avatar', u.avatar, 'role', u.role)) filter (where u.id <> $1) as participants,
+    `select c.*, json_agg(json_build_object('id', u.id, 'name', u.name, 'avatar', u.avatar, 'role', u.role, 'email', u.email)) filter (where u.id <> $1) as participants,
       count(m.id) filter (where m.receiver_id = $1 and m.status <> 'READ')::int as unread_count
      from conversations c
      join conversation_participants mine on mine.conversation_id = c.id and mine.user_id = $1

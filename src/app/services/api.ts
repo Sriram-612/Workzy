@@ -21,9 +21,11 @@ const API_BASE_URL = getApiBaseUrl();
 // Mock data when the API is unreachable (never used for /auth — real credentials only)
 const SMART_FALLBACK = true;
 
-/** Auth and profile mutations must hit the real API (no mock fallback). */
+/** Auth, messaging, and profile mutations must hit the real API (no mock fallback). */
 function requiresRealBackend(endpoint: string, options: RequestInit = {}): boolean {
   if (endpoint.startsWith('/auth')) return true;
+  if (endpoint.startsWith('/messages')) return true;
+  if (endpoint.startsWith('/users/lookup')) return true;
   const method = (options.method || 'GET').toUpperCase();
   if (endpoint === '/users/profile' && method === 'PUT') return true;
   if (endpoint === '/users/avatar' && method === 'POST') return true;
@@ -112,13 +114,18 @@ async function apiRequest<T>(
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      let msg = (errorData as { message?: string }).message || `HTTP error! status: ${response.status}`;
+      const details = (errorData as { details?: { message?: string }[] }).details;
+      if (Array.isArray(details) && details.length > 0 && details[0]?.message) {
+        msg = details[0].message;
+      }
+      throw new Error(msg);
     }
 
     return await response.json();
   } catch (error) {
     if (requiresRealBackend(endpoint, options)) {
-      console.error('Auth request failed:', error);
+      console.error('API request failed:', error);
       throw error instanceof Error ? error : new Error('Authentication failed');
     }
     if (SMART_FALLBACK) {
@@ -253,6 +260,11 @@ export const authAPI = {
 
 // User API
 export const userAPI = {
+  lookupByEmail: async (email: string) => {
+    const q = encodeURIComponent(email.trim());
+    return apiRequest(`/users/lookup?email=${q}`);
+  },
+
   updateProfile: async (profileData: any) => {
     return apiRequest('/users/profile', {
       method: 'PUT',
@@ -436,7 +448,9 @@ export const projectsAPI = {
 // Messages API
 export const messagesAPI = {
   sendMessage: async (messageData: {
-    receiverId: string;
+    receiverId?: string;
+    receiverEmail?: string;
+    recipientName?: string;
     content: string;
   }) => {
     return apiRequest('/messages', {

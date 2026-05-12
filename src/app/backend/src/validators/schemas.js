@@ -59,7 +59,36 @@ const proposalStatusSchema = z.object({
   body: z.object({ status: z.enum(['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'accepted', 'rejected', 'withdrawn']) })
 });
 const messageSchema = z.object({
-  body: z.object({ receiverId: z.string().uuid(), content: z.string().min(1) })
+  body: z
+    .object({
+      receiverId: z.string().uuid().optional(),
+      receiverEmail: z.string().email().optional(),
+      recipientName: z.string().min(2).max(200).optional(),
+      content: z.string().min(1).max(20000)
+    })
+    .superRefine((data, ctx) => {
+      const hasId = Boolean(data.receiverId);
+      const hasEmail = Boolean(data.receiverEmail?.trim());
+      if (!hasId && !hasEmail) {
+        ctx.addIssue({ code: 'custom', message: 'Provide receiverId or receiverEmail' });
+      }
+      if (hasId && hasEmail) {
+        ctx.addIssue({ code: 'custom', message: 'Provide only one of receiverId or receiverEmail' });
+      }
+      if (hasEmail && !data.recipientName?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['recipientName'],
+          message: 'Recipient name is required when sending by email'
+        });
+      }
+    })
+});
+
+const lookupEmailQuerySchema = z.object({
+  query: z.object({ email: z.string().email() }),
+  body: z.object({}).optional(),
+  params: z.object({}).optional()
 });
 const paymentIntentSchema = z.object({
   body: z.object({ projectId: z.string().uuid(), amount: z.number().positive(), currency: z.string().default('usd') })
@@ -83,6 +112,7 @@ module.exports = {
   proposalSchema,
   proposalStatusSchema,
   messageSchema,
+  lookupEmailQuerySchema,
   paymentIntentSchema,
   reviewSchema
 };
