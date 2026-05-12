@@ -1,0 +1,29 @@
+{
+  "name": "workzy-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Workzy student freelance marketplace",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "db:schema": "node src/database/runSql.js src/database/schema.sql",
+    "db:seed": "node src/database/runSql.js src/database/seed.sql"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "pg": "^8.13.1",
+    "socket.io": "^4.7.4",
+    "stripe": "^14.9.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
