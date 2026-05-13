@@ -103,6 +103,10 @@ const reviewSchema = z.object({
   })
 });
 
+const hireResponseSchema = z.object({
+  body: z.object({ accept: z.boolean() })
+});
+
 module.exports = {
   idParam,
   registerSchema,
@@ -113,6 +117,7 @@ module.exports = {
   proposalStatusSchema,
   messageSchema,
   lookupEmailQuerySchema,
+  hireResponseSchema,
   paymentIntentSchema,
   reviewSchema
 };

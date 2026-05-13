@@ -1,5 +1,18 @@
 const { query } = require('../database/db');
 
+/** Browse UI uses slug ids; stored jobs use display titles (see schema check on jobs.category). */
+function normalizeCategoryFilter(category) {
+  if (category == null || category === '') return null;
+  const slugToStored = {
+    development: 'Development',
+    design: 'Design',
+    'video-editing': 'Video Editing',
+    'ai-content': 'AI & Content',
+  };
+  if (slugToStored[category]) return slugToStored[category];
+  return category;
+}
+
 function mapJob(row) {
   if (!row) return row;
   return {
@@ -43,9 +56,10 @@ async function listJobs(filters) {
   const page = Number(filters.page || 1);
   const limit = Number(filters.limit || 12);
   const offset = (page - 1) * limit;
+  const categoryFilter = normalizeCategoryFilter(filters.category);
   const params = [
     `%${filters.query || ''}%`,
-    filters.category || null,
+    categoryFilter,
     filters.budgetType || null,
     filters.experienceLevel || null,
     filters.skills ? String(filters.skills).split(',').filter(Boolean) : [],
@@ -114,4 +128,39 @@ async function listClientJobs(clientId) {
   return result.rows.map(mapJob);
 }
 
-module.exports = { createJob, listJobs, getJobById, updateJob, closeJob, listClientJobs, mapJob };
+async function saveJobForUser(userId, jobId) {
+  const job = await query(`select id, status, client_id from jobs where id = $1`, [jobId]);
+  if (!job.rowCount) return { ok: false, code: 'NOT_FOUND' };
+  const j = job.rows[0];
+  if (j.client_id === userId) return { ok: false, code: 'OWN_JOB' };
+  if (j.status !== 'ACTIVE') return { ok: false, code: 'NOT_ACTIVE' };
+  await query(`insert into saved_jobs (user_id, job_id) values ($1, $2) on conflict do nothing`, [userId, jobId]);
+  return { ok: true };
+}
+
+async function unsaveJobForUser(userId, jobId) {
+  await query(`delete from saved_jobs where user_id = $1 and job_id = $2`, [userId, jobId]);
+  return { ok: true };
+}
+
+async function listSavedJobsForUser(userId) {
+  const result = await query(
+    `select j.*, u.name client_name, u.avatar client_avatar, u.company_name, u.rating client_rating, count(p.id)::int proposal_count
+     from saved_jobs s
+     join jobs j on j.id = s.job_id
+     join users u on u.id = j.client_id
+     left join proposals p on p.job_id = j.id
+     where s.user_id = $1
+     group by j.id, u.id, s.created_at
+     order by s.created_at desc`,
+    [userId]
+  );
+  return result.rows.map(mapJob);
+}
+
+async function isJobSaved(userId, jobId) {
+  const r = await query(`select 1 from saved_jobs where user_id = $1 and job_id = $2`, [userId, jobId]);
+  return r.rowCount > 0;
+}
+
+module.exports = { createJob, listJobs, getJobById, updateJob, closeJob, listClientJobs, mapJob, saveJobForUser, unsaveJobForUser, listSavedJobsForUser, isJobSaved };

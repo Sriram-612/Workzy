@@ -118,23 +118,35 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
     }
   }, [searchQuery, selectedCategory, sortBy]);
 
-  // Load saved jobs from localStorage
+  // Saved jobs (freelancers only) — synced with backend
   useEffect(() => {
-    const saved = localStorage.getItem(`savedJobs_${user.id}`);
-    if (saved) {
-      setSavedJobs(JSON.parse(saved));
-    }
-  }, [user.id]);
+    if (user.role !== 'freelancer') return;
+    (async () => {
+      try {
+        const res = (await jobsAPI.getSavedJobs()) as { jobs?: { id: string }[] };
+        setSavedJobs((res.jobs || []).map((j) => j.id));
+      } catch {
+        setSavedJobs([]);
+      }
+    })();
+  }, [user.id, user.role]);
 
-  const handleSaveJob = (jobId: string) => {
-    const newSavedJobs = savedJobs.includes(jobId) 
-      ? savedJobs.filter(id => id !== jobId)
-      : [...savedJobs, jobId];
-    
-    setSavedJobs(newSavedJobs);
-    localStorage.setItem(`savedJobs_${user.id}`, JSON.stringify(newSavedJobs));
-    
-    toast.success(savedJobs.includes(jobId) ? 'Job removed from saved' : 'Job saved!');
+  const handleSaveJob = async (jobId: string) => {
+    if (user.role !== 'freelancer') return;
+    const wasSaved = savedJobs.includes(jobId);
+    try {
+      if (wasSaved) {
+        await jobsAPI.unsaveJob(jobId);
+        setSavedJobs((prev) => prev.filter((id) => id !== jobId));
+        toast.success('Removed from saved jobs');
+      } else {
+        await jobsAPI.saveJob(jobId);
+        setSavedJobs((prev) => [...prev, jobId]);
+        toast.success('Job saved to your profile');
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Could not update saved jobs');
+    }
   };
 
   const filteredJobs = jobs.filter(job => {
@@ -543,7 +555,7 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
                           </div>
                           <div className="flex items-center gap-1">
                             <Briefcase className="w-4 h-4" />
-                            {job._count?.proposals || 0} proposals
+                            {job.proposalCount ?? 0} proposals
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
@@ -553,14 +565,16 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
                       </div>
 
                       <div className="ml-6 text-right">
+                        {user.role === 'freelancer' ? (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSaveJob(job.id)}
+                          onClick={() => void handleSaveJob(job.id)}
                           className="mb-2"
                         >
                           <Heart className={`w-4 h-4 ${savedJobs.includes(job.id) ? 'fill-red-500 text-red-500' : ''}`} />
                         </Button>
+                        ) : null}
                         
                         <div className="flex items-center gap-2 mb-2">
                           <Avatar className="w-8 h-8">

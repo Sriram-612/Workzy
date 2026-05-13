@@ -10,7 +10,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { 
   Plus, Bell, MessageSquare, Briefcase, IndianRupee, 
   Users, Clock, Star, Search, Menu, LogOut,
-  ChevronRight, Calendar, TrendingUp, DollarSign,
+  Calendar, TrendingUp, DollarSign,
   FileText, Shield, Loader2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -24,7 +24,6 @@ interface ClientDashboardProps {
 }
 
 export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
-  const [showNotifications, setShowNotifications] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     amountDue: '₹0',
@@ -36,6 +35,34 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
   const [postedJobs, setPostedJobs] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [topFreelancers, setTopFreelancers] = useState<any[]>([]);
+
+  const getProjectFreelancerName = (project: any) =>
+    project.freelancerName ||
+    project.freelancer ||
+    project.freelancer_name ||
+    'Assigned freelancer';
+
+  const getProjectBudget = (project: any) => {
+    if (project.budget) return `₹${project.budget}`;
+    if (project.fixedBudget) return `₹${project.fixedBudget}`;
+    if (project.fixed_budget) return `₹${project.fixed_budget}`;
+    return 'Budget pending';
+  };
+
+  const getProjectDeadline = (project: any) => {
+    const rawDate = project.deadline || project.dueDate || project.due_date || project.created_at;
+    if (!rawDate) return 'No deadline';
+
+    const date = new Date(rawDate);
+    return Number.isNaN(date.getTime()) ? String(rawDate) : date.toLocaleDateString();
+  };
+
+  const getProjectProgress = (project: any) => {
+    const progress = Number(project.progress ?? 0);
+    return Number.isFinite(progress) ? Math.min(Math.max(progress, 0), 100) : 0;
+  };
+
+  const getProjectStatus = (project: any) => String(project.status || 'Pending');
 
   // Load dashboard data
   useEffect(() => {
@@ -111,47 +138,23 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <Link to="/escrow" className="text-muted-foreground hover:text-primary">
                   Escrow
                 </Link>
+                <Link to="/notifications" className="text-muted-foreground hover:text-primary">
+                  Notifications
+                </Link>
               </nav>
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
-                  <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs"></span>
-                  )}
-                </Button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-card rounded-lg shadow-lg border border-border z-50">
-                    <div className="p-4">
-                      <h3 className="mb-3 text-foreground">Notifications</h3>
-                      <div className="space-y-3">
-                        {notifications.length > 0 ? (
-                          notifications.map(notification => (
-                            <div key={notification.id} className="flex items-start space-x-3 p-2 hover:bg-muted rounded">
-                              <div className="flex-1">
-                                <p className="text-sm text-foreground">{notification.message}</p>
-                                <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center py-4 text-muted-foreground">
-                            <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm">No notifications yet</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/notifications" aria-label="Notifications">
+                  <span className="relative inline-flex">
+                    <Bell className="w-5 h-5" />
+                    {notifications.length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
+                    )}
+                  </span>
+                </Link>
+              </Button>
 
               <Link to="/profile">
                 <Avatar className="w-8 h-8">
@@ -286,46 +289,51 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
               <CardContent>
                 <div className="space-y-4">
                   {activeProjects.length > 0 ? (
-                    activeProjects.map(project => (
-                      <div key={project.id} className="p-4 border border-border rounded-lg hover:bg-muted transition-colors">
+                    activeProjects.map(project => {
+                      const freelancerName = getProjectFreelancerName(project);
+                      const progress = getProjectProgress(project);
+
+                      return (
+                        <div key={project.id} className="p-4 border border-border rounded-lg hover:bg-muted transition-colors">
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <h4 className="text-sm text-foreground mb-1">{project.title}</h4>
+                            <h4 className="text-sm text-foreground mb-1">{project.title || 'Untitled project'}</h4>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Avatar className="w-4 h-4">
                                 <AvatarImage src={project.freelancerAvatar} />
                                 <AvatarFallback className="text-xs">
-                                  {project.freelancer.charAt(0)}
+                                  {freelancerName.charAt(0).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              {project.freelancer}
+                              {freelancerName}
                             </div>
                           </div>
-                          <Badge variant={project.status === 'in-progress' ? 'default' : 'secondary'}>
-                            {project.status}
+                          <Badge variant={getProjectStatus(project).toUpperCase() === 'ACTIVE' ? 'default' : 'secondary'}>
+                            {getProjectStatus(project).toLowerCase()}
                           </Badge>
                         </div>
                         
                         <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                           <span className="flex items-center gap-1">
                             <DollarSign className="w-3 h-3" />
-                            {project.budget}
+                            {getProjectBudget(project)}
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            {project.deadline}
+                            {getProjectDeadline(project)}
                           </span>
                         </div>
 
                         <div className="mt-3">
                           <div className="flex justify-between text-xs mb-1">
                             <span className="text-foreground">Progress</span>
-                            <span className="text-foreground">{project.progress}%</span>
+                            <span className="text-foreground">{progress}%</span>
                           </div>
-                          <Progress value={project.progress} className="h-2" />
+                          <Progress value={progress} className="h-2" />
                         </div>
-                      </div>
-                    ))
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       <Briefcase className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
@@ -355,36 +363,44 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                       <p className="text-sm text-muted-foreground">Loading jobs...</p>
                     </div>
                    ) : postedJobs.length > 0 ? (
-                    postedJobs.map(job => (
-                      <Link 
-                        key={job.id} 
-                        to={`/job/${job.id}`}
-                        className="block p-4 border border-border rounded-lg hover:bg-muted transition-colors"
+                    postedJobs.map((job) => (
+                      <div
+                        key={job.id}
+                        className="p-4 border border-border rounded-lg hover:bg-muted transition-colors space-y-3"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <Link to={`/job/${job.id}`} className="block flex-1 min-w-0">
                             <h4 className="text-sm text-foreground mb-1">{job.title}</h4>
                             <p className="text-xs text-muted-foreground">
-                              Posted: {new Date(job.createdAt).toLocaleDateString()}
+                              Posted: {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : '—'}
                             </p>
-                          </div>
+                          </Link>
                           <Badge variant={job.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                            {job.status.toLowerCase()}
+                            {String(job.status || '').toLowerCase()}
                           </Badge>
                         </div>
-                        
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <DollarSign className="w-3 h-3" />
                             {job.budgetType === 'FIXED' ? `₹${job.fixedBudget}` : `₹${job.hourlyRate}/hr`}
                           </span>
                           <span className="flex items-center gap-1">
                             <Users className="w-3 h-3" />
-                            {job._count?.proposals || 0} applicants
+                            {job.proposalCount ?? 0} applicants
                           </span>
-                          <ChevronRight className="w-4 h-4" />
                         </div>
-                      </Link>
+                        <div className="flex flex-wrap gap-2">
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/job/${job.id}`}>View job</Link>
+                          </Button>
+                          <Button size="sm" variant="secondary" asChild>
+                            <Link to={`/job/${job.id}/applicants`}>
+                              <Users className="w-3 h-3 mr-1" />
+                              Applicants
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
                     ))
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">

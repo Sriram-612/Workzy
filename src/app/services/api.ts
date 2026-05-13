@@ -26,6 +26,10 @@ function requiresRealBackend(endpoint: string, options: RequestInit = {}): boole
   if (endpoint.startsWith('/auth')) return true;
   if (endpoint.startsWith('/messages')) return true;
   if (endpoint.startsWith('/users/lookup')) return true;
+  if (endpoint.startsWith('/proposals')) return true;
+  if (endpoint.startsWith('/jobs/user')) return true;
+  if (endpoint === '/jobs' || endpoint.startsWith('/jobs?')) return true;
+  if (endpoint.startsWith('/notifications')) return true;
   const method = (options.method || 'GET').toUpperCase();
   if (endpoint === '/users/profile' && method === 'PUT') return true;
   if (endpoint === '/users/avatar' && method === 'POST') return true;
@@ -92,10 +96,20 @@ async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
-  
-  const defaultHeaders: HeadersInit = isFormData ? {} : {
-    'Content-Type': 'application/json',
-  };
+  const method = (options.method || 'GET').toUpperCase();
+  // Express JSON parser rejects empty bodies when Content-Type is application/json.
+  let body = options.body;
+  if (!isFormData && method === 'POST' && (body === undefined || body === null || body === '')) {
+    body = '{}';
+  }
+
+  const defaultHeaders: HeadersInit = isFormData ? {} : {};
+  if (!isFormData && ['POST', 'PUT', 'PATCH'].includes(method)) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
+  if (!isFormData && method === 'DELETE' && body != null && body !== '') {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
 
   if (authToken) {
     defaultHeaders['Authorization'] = `Bearer ${authToken}`;
@@ -103,6 +117,7 @@ async function apiRequest<T>(
 
   const config: RequestInit = {
     ...options,
+    body,
     headers: {
       ...defaultHeaders,
       ...options.headers,
@@ -369,6 +384,18 @@ export const jobsAPI = {
   getUserPostedJobs: async () => {
     return apiRequest('/jobs/user/posted');
   },
+
+  getSavedJobs: async () => {
+    return apiRequest('/jobs/user/saved');
+  },
+
+  saveJob: async (jobId: string) => {
+    return apiRequest(`/jobs/${jobId}/save`, { method: 'POST' });
+  },
+
+  unsaveJob: async (jobId: string) => {
+    return apiRequest(`/jobs/${jobId}/save`, { method: 'DELETE' });
+  },
 };
 
 // Proposals API
@@ -402,6 +429,17 @@ export const proposalsAPI = {
   rejectProposal: async (proposalId: string) => {
     return apiRequest(`/proposals/${proposalId}/reject`, {
       method: 'POST',
+    });
+  },
+
+  sendHireOffer: async (proposalId: string) => {
+    return apiRequest(`/proposals/${proposalId}/hire-offer`, { method: 'POST' });
+  },
+
+  respondToHireOffer: async (proposalId: string, accept: boolean) => {
+    return apiRequest(`/proposals/${proposalId}/hire-response`, {
+      method: 'POST',
+      body: JSON.stringify({ accept }),
     });
   },
 

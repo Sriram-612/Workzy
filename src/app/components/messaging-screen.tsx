@@ -20,7 +20,7 @@ import {
   Loader2,
   UserCheck,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { User } from '../App';
 import { messagesAPI, userAPI } from '../services/api';
@@ -88,6 +88,7 @@ function mapConversationRow(row: Record<string, unknown>, currentUserId: string)
 }
 
 export function MessagingScreen({ user }: MessagingScreenProps) {
+  const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -127,6 +128,15 @@ export function MessagingScreen({ user }: MessagingScreenProps) {
   useEffect(() => {
     void loadConversations();
   }, [loadConversations]);
+
+  useEffect(() => {
+    const email = searchParams.get('email');
+    const name = searchParams.get('name');
+    if (!email) return;
+    setNewRecipientEmail(decodeURIComponent(email));
+    if (name) setNewRecipientName(decodeURIComponent(name));
+    setShowNewMessageDialog(true);
+  }, [searchParams]);
 
   const loadMessages = useCallback(
     async (conversationId: string) => {

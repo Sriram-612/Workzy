@@ -30,4 +30,14 @@ async function reject(req, res) {
   res.json({ message: 'Proposal rejected', ...result });
 }
 
-module.exports = { createProposal, getJobProposals, getUserProposals, updateStatus, accept, reject };
+async function sendHireOffer(req, res) {
+  const result = await service.sendHireOffer(req.params.id, req.user.id);
+  res.json(result);
+}
+
+async function respondHireOffer(req, res) {
+  const result = await service.respondToHireOffer(req.params.id, req.user.id, req.body.accept);
+  res.json(result);
+}
+
+module.exports = { createProposal, getJobProposals, getUserProposals, updateStatus, accept, reject, sendHireOffer, respondHireOffer };

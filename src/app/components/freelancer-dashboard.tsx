@@ -1,5 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { 
+  Search, Bell, MessageSquare, Briefcase, IndianRupee, 
+  TrendingUp, Clock, Star, Users, Menu, LogOut,
+  ChevronRight, Calendar, Award, FileText, Shield, DollarSign,
+  Heart, Loader2
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import type { User } from '../App';
+import { jobsAPI } from '../services/api';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -7,13 +16,6 @@ import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { ThemeToggle } from './theme-toggle';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { 
-  Search, Bell, MessageSquare, Briefcase, IndianRupee, 
-  TrendingUp, Clock, Star, Users, Menu, LogOut,
-  ChevronRight, Calendar, Award, FileText, Shield, DollarSign
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
-import type { User } from '../App';
 
 interface FreelancerDashboardProps {
   user: User;
@@ -25,10 +27,24 @@ const recentJobs: any[] = [];
 
 const recentProposals: any[] = [];
 
-const notifications: any[] = [];
-
 export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps) {
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [savedJobsList, setSavedJobsList] = useState<{ id: string; title?: string; category?: string }[]>([]);
+  const [savedJobsLoading, setSavedJobsLoading] = useState(false);
+
+  useEffect(() => {
+    if (user.role !== 'freelancer') return;
+    (async () => {
+      setSavedJobsLoading(true);
+      try {
+        const res = (await jobsAPI.getSavedJobs()) as { jobs?: { id: string; title?: string; category?: string }[] };
+        setSavedJobsList(res.jobs || []);
+      } catch {
+        setSavedJobsList([]);
+      } finally {
+        setSavedJobsLoading(false);
+      }
+    })();
+  }, [user.role, user.id]);
 
   const stats = {
     earnings: '₹0',
@@ -72,47 +88,18 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                 <Link to="/escrow" className="text-muted-foreground hover:text-primary">
                   Earnings
                 </Link>
+                <Link to="/notifications" className="text-muted-foreground hover:text-primary">
+                  Notifications
+                </Link>
               </nav>
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/notifications" aria-label="Notifications">
                   <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs"></span>
-                  )}
-                </Button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-card rounded-lg shadow-lg border border-border z-50">
-                    <div className="p-4">
-                      <h3 className="mb-3 text-foreground">Notifications</h3>
-                      <div className="space-y-3">
-                        {notifications.length > 0 ? (
-                          notifications.map(notification => (
-                            <div key={notification.id} className="flex items-start space-x-3 p-2 hover:bg-muted rounded">
-                              <div className="flex-1">
-                                <p className="text-sm text-foreground">{notification.message}</p>
-                                <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center py-4 text-muted-foreground">
-                            <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm">No notifications yet</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+                </Link>
+              </Button>
 
               <Link to="/profile">
                 <Avatar className="w-8 h-8">
@@ -223,6 +210,51 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                   <p className="text-2xl text-foreground">{stats.rating}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Heart className="w-5 h-5 text-red-500" />
+                Saved jobs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {savedJobsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : savedJobsList.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No saved jobs yet. Use &quot;Save for later&quot; on a job while browsing or on the job page.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {savedJobsList.map((j) => (
+                    <li key={j.id}>
+                      <Link
+                        to={`/job/${j.id}`}
+                        className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 hover:bg-muted text-sm"
+                      >
+                        <span className="font-medium text-foreground truncate">{j.title || 'Job'}</span>
+                        {j.category ? (
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            {j.category}
+                          </Badge>
+                        ) : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </motion.div>

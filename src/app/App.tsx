@@ -10,6 +10,8 @@ import { ClientDashboard } from './components/client-dashboard';
 import { BrowseJobs } from './components/browse-jobs';
 import { PostJob } from './components/post-job';
 import { JobDetails } from './components/job-details';
+import { JobApplicants } from './components/job-applicants';
+import { NotificationsScreen } from './components/notifications-screen';
 import { SearchFreelancers } from './components/search-freelancers';
 import { MessagingScreen } from './components/messaging-screen';
 import { ProfileScreen } from './components/profile-screen';
@@ -184,6 +186,8 @@ export default function App() {
                 <Route path="/browse-jobs" element={<BrowseJobs user={user} />} />
                 <Route path="/post-job" element={<PostJob user={user} />} />
                 <Route path="/job/:id" element={<JobDetails user={user} />} />
+                <Route path="/job/:jobId/applicants" element={<JobApplicants user={user} />} />
+                <Route path="/notifications" element={<NotificationsScreen user={user} />} />
                 <Route path="/search-freelancers" element={<SearchFreelancers user={user} />} />
                 <Route path="/messages" element={<MessagingScreen user={user} />} />
                 <Route path="/profile" element={<ProfileScreen user={user} onUpdate={updateUser} />} />

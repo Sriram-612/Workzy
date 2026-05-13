@@ -228,3 +228,13 @@ create index if not exists idx_messages_conversation_id_created on messages(conv
 create index if not exists idx_messages_receiver_status on messages(receiver_id, status);
 create index if not exists idx_notifications_user_read_created on notifications(user_id, is_read, created_at desc);
 create index if not exists idx_payments_project_id on payments(project_id);
+
+-- Saved jobs + hire-offer workflow (idempotent for fresh installs)
+create table if not exists saved_jobs (
+  user_id uuid not null references users(id) on delete cascade,
+  job_id uuid not null references jobs(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, job_id)
+);
+create index if not exists idx_saved_jobs_user on saved_jobs(user_id);
+alter table proposals add column if not exists hire_offer_status text;

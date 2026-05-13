@@ -40,4 +40,24 @@ async function userPostedJobs(req, res) {
   res.json({ message: 'Jobs retrieved successfully', jobs: listed });
 }
 
-module.exports = { createJob, listJobs, getJob, updateJob, deleteJob, userPostedJobs };
+async function userSavedJobs(req, res) {
+  const listed = await jobs.listSavedJobsForUser(req.user.id);
+  res.json({ message: 'Saved jobs retrieved successfully', jobs: listed });
+}
+
+async function saveJob(req, res) {
+  const r = await jobs.saveJobForUser(req.user.id, req.params.id);
+  if (!r.ok) {
+    if (r.code === 'NOT_FOUND') throw createError('Job not found', 404);
+    if (r.code === 'OWN_JOB') throw createError('You cannot save your own job posting', 400);
+    if (r.code === 'NOT_ACTIVE') throw createError('Only active jobs can be saved', 400);
+  }
+  res.json({ message: 'Job saved' });
+}
+
+async function unsaveJob(req, res) {
+  await jobs.unsaveJobForUser(req.user.id, req.params.id);
+  res.json({ message: 'Job removed from saved' });
+}
+
+module.exports = { createJob, listJobs, getJob, updateJob, deleteJob, userPostedJobs, userSavedJobs, saveJob, unsaveJob };

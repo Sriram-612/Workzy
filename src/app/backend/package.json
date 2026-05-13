@@ -7,7 +7,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "db:schema": "node src/database/runSql.js src/database/schema.sql",
-    "db:seed": "node src/database/runSql.js src/database/seed.sql"
+    "db:seed": "node src/database/runSql.js src/database/seed.sql",
+    "db:migrate": "node src/database/runSql.js src/database/migrate_apply_workflow.sql"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
