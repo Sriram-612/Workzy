@@ -12,7 +12,7 @@ const slides = [
   {
     icon: Users,
     title: "Hire Skilled College Students",
-    description: "Access verified students from top colleges like IIT, BITS, and NIT. Get quality work at competitive rates with college-verified profiles.",
+    description: "Access student profiles created on Workzy. See only details students provide themselves.",
     image: "https://images.unsplash.com/photo-1596784326488-23581279e33d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjB3b3Jrc3BhY2UlMjBmcmVlbGFuY2VyfGVufDF8fHx8MTc1ODUwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
   },
   {
@@ -23,8 +23,8 @@ const slides = [
   },
   {
     icon: Star,
-    title: "Secure Escrow Payments",
-    description: "Pay with confidence. Funds are held in escrow and released only when you're satisfied. Every student is rated and verified for quality.",
+    title: "Direct UPI Payments",
+    description: "Pay students quickly with a simple Razorpay-backed direct payment workflow. Workzy starts with 0% platform commission.",
     image: "https://images.unsplash.com/photo-1716703432455-3045789de738?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMG1lZXRpbmclMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc1ODUyNzUwMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
   }
 ];

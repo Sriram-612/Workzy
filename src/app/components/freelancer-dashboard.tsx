@@ -85,8 +85,8 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                 <Link to="/profile" className="text-muted-foreground hover:text-primary">
                   Portfolio
                 </Link>
-                <Link to="/escrow" className="text-muted-foreground hover:text-primary">
-                  Earnings
+                <Link to="/payments" className="text-muted-foreground hover:text-primary">
+                  Payments
                 </Link>
                 <Link to="/notifications" className="text-muted-foreground hover:text-primary">
                   Notifications

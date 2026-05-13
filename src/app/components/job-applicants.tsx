@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -39,6 +39,7 @@ type ProposalRow = {
   id: string;
   status: string;
   hireOfferStatus?: string | null;
+  projectId?: string;
   coverLetter?: string;
   proposedBudget?: number;
   timeline?: string;
@@ -48,11 +49,13 @@ type ProposalRow = {
 
 export function JobApplicants({ user }: JobApplicantsProps) {
   const { jobId } = useParams();
+  const navigate = useNavigate();
   const [jobTitle, setJobTitle] = useState('');
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [proposals, setProposals] = useState<ProposalRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [hireBusy, setHireBusy] = useState<string | null>(null);
+  const [acceptBusy, setAcceptBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!jobId) return;
@@ -114,6 +117,24 @@ export function JobApplicants({ user }: JobApplicantsProps) {
       toast.error(e instanceof Error ? e.message : 'Could not send hire offer');
     } finally {
       setHireBusy(null);
+    }
+  };
+
+  const onAcceptAndPay = async (proposalId: string) => {
+    setAcceptBusy(proposalId);
+    try {
+      const response = await proposalsAPI.acceptProposal(proposalId);
+      const projectId = response.project?.id || response.project?.projectId;
+      toast.success('Student accepted. Complete payment to activate the project.');
+      if (projectId) {
+        navigate(`/payments/${projectId}`);
+      } else {
+        navigate('/payments');
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Could not accept proposal');
+    } finally {
+      setAcceptBusy(null);
     }
   };
 
@@ -193,15 +214,35 @@ export function JobApplicants({ user }: JobApplicantsProps) {
                           </Button>
                         ) : null}
                         {canInviteHire ? (
-                          <Button size="sm" disabled={hireBusy === p.id} onClick={() => void onHire(p.id)}>
+                          <Button size="sm" disabled={acceptBusy === p.id} onClick={() => void onAcceptAndPay(p.id)}>
+                            {acceptBusy === p.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <>
+                                <IndianRupee className="w-4 h-4 mr-2" />
+                                Accept & Pay Student
+                              </>
+                            )}
+                          </Button>
+                        ) : null}
+                        {canInviteHire ? (
+                          <Button variant="outline" size="sm" disabled={hireBusy === p.id} onClick={() => void onHire(p.id)}>
                             {hireBusy === p.id ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                               <>
                                 <UserCheck className="w-4 h-4 mr-2" />
-                                Hire
+                                Send Invite
                               </>
                             )}
+                          </Button>
+                        ) : null}
+                        {statusUp === 'ACCEPTED' && p.projectId ? (
+                          <Button size="sm" asChild>
+                            <Link to={`/payments/${p.projectId}`}>
+                              <IndianRupee className="w-4 h-4 mr-2" />
+                              Pay Student
+                            </Link>
                           </Button>
                         ) : null}
                         {hireSt === 'PENDING' ? (

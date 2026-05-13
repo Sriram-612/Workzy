@@ -77,7 +77,7 @@ The system uses the following main tables:
 - `proposals` - Freelancer proposals for jobs
 - `projects` - Active projects between clients and freelancers
 - `messages` - Real-time messaging system
-- `payments` - Payment and escrow transactions
+- `payments` - Direct Razorpay payment tracking
 - `reviews` - User reviews and ratings
 - `notifications` - System notifications
 

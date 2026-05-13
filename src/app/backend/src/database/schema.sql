@@ -37,14 +37,26 @@ do $$ begin
   create type proposal_status as enum ('PENDING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN');
 exception when duplicate_object then null; end $$;
 do $$ begin
-  create type project_status as enum ('PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED');
+  create type project_status as enum ('PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'proposal_accepted', 'payment_pending', 'paid_directly', 'active', 'submitted', 'completed', 'cancelled');
 exception when duplicate_object then null; end $$;
 do $$ begin
   create type message_status as enum ('SENT', 'DELIVERED', 'READ');
 exception when duplicate_object then null; end $$;
 do $$ begin
-  create type payment_status as enum ('CREATED', 'AUTHORIZED', 'HELD', 'RELEASED', 'REFUNDED', 'FAILED');
+  create type payment_status as enum ('pending', 'paid_directly', 'failed', 'cancelled');
 exception when duplicate_object then null; end $$;
+
+do $$ begin alter type project_status add value if not exists 'proposal_accepted'; exception when duplicate_object then null; end $$;
+do $$ begin alter type project_status add value if not exists 'payment_pending'; exception when duplicate_object then null; end $$;
+do $$ begin alter type project_status add value if not exists 'paid_directly'; exception when duplicate_object then null; end $$;
+do $$ begin alter type project_status add value if not exists 'active'; exception when duplicate_object then null; end $$;
+do $$ begin alter type project_status add value if not exists 'submitted'; exception when duplicate_object then null; end $$;
+do $$ begin alter type project_status add value if not exists 'completed'; exception when duplicate_object then null; end $$;
+do $$ begin alter type project_status add value if not exists 'cancelled'; exception when duplicate_object then null; end $$;
+do $$ begin alter type payment_status add value if not exists 'pending'; exception when duplicate_object then null; end $$;
+do $$ begin alter type payment_status add value if not exists 'paid_directly'; exception when duplicate_object then null; end $$;
+do $$ begin alter type payment_status add value if not exists 'failed'; exception when duplicate_object then null; end $$;
+do $$ begin alter type payment_status add value if not exists 'cancelled'; exception when duplicate_object then null; end $$;
 
 create table if not exists users (
   id uuid primary key default uuid_generate_v4(),
@@ -167,19 +179,28 @@ create table if not exists reviews (
 create table if not exists payments (
   id uuid primary key default uuid_generate_v4(),
   project_id uuid not null references projects(id) on delete cascade,
-  payer_id uuid not null references users(id),
-  payee_id uuid not null references users(id),
-  stripe_payment_intent_id text unique,
+  client_id uuid not null references users(id),
+  student_id uuid not null references users(id),
   amount numeric(12,2) not null,
-  currency text not null default 'usd',
-  platform_fee_bps integer not null default 0,
-  platform_fee_amount numeric(12,2) not null default 0,
-  status payment_status not null default 'CREATED',
-  release_requested_at timestamptz,
-  released_at timestamptz,
+  currency text not null default 'INR',
+  payment_method text not null default 'upi',
+  razorpay_payment_id text unique,
+  razorpay_order_id text unique,
+  payment_status payment_status not null default 'pending',
+  paid_at timestamptz,
   metadata jsonb not null default '{}',
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  check (amount > 0),
+  check (currency = upper(currency))
+);
+
+create table if not exists payment_logs (
+  id uuid primary key default uuid_generate_v4(),
+  payment_id uuid references payments(id) on delete set null,
+  event_type text not null,
+  payload jsonb not null default '{}',
+  created_at timestamptz not null default now()
 );
 
 create table if not exists notifications (
@@ -224,10 +245,16 @@ create index if not exists idx_proposals_job_id on proposals(job_id);
 create index if not exists idx_proposals_freelancer_id on proposals(freelancer_id);
 create index if not exists idx_projects_client_id on projects(client_id);
 create index if not exists idx_projects_freelancer_id on projects(freelancer_id);
+create index if not exists idx_projects_status on projects(status);
 create index if not exists idx_messages_conversation_id_created on messages(conversation_id, created_at desc);
 create index if not exists idx_messages_receiver_status on messages(receiver_id, status);
 create index if not exists idx_notifications_user_read_created on notifications(user_id, is_read, created_at desc);
 create index if not exists idx_payments_project_id on payments(project_id);
+create index if not exists idx_payments_client_id on payments(client_id);
+create index if not exists idx_payments_student_id on payments(student_id);
+create index if not exists idx_payments_status on payments(payment_status);
+create index if not exists idx_payment_logs_payment_id on payment_logs(payment_id);
+create unique index if not exists idx_payments_one_open_per_project on payments(project_id) where payment_status in ('pending', 'paid_directly');
 
 -- Saved jobs + hire-offer workflow (idempotent for fresh installs)
 create table if not exists saved_jobs (

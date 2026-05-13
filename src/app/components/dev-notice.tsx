@@ -57,7 +57,7 @@ export function DevNotice() {
         return {
           color: 'amber',
           icon: AlertCircle,
-          message: 'Backend disconnected. Using mock data. Run "./start-backend.sh" to connect to your database.'
+          message: 'Backend disconnected. Real marketplace data may not load. Run "./start-backend.sh" to connect to your database.'
         };
     }
   };

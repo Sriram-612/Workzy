@@ -40,11 +40,11 @@ interface Agreement {
   status: 'draft' | 'pending_client' | 'pending_freelancer' | 'signed' | 'disputed';
   clientSignature?: {
     date: string;
-    ipAddress: string;
+    ipAddress?: string;
   };
   freelancerSignature?: {
     date: string;
-    ipAddress: string;
+    ipAddress?: string;
   };
   createdAt: string;
 }
@@ -83,14 +83,14 @@ export function ProjectAgreement({ user, projectId, onAgreementSigned }: Project
   const [clientAgreed, setClientAgreed] = useState(false);
   const [freelancerAgreed, setFreelancerAgreed] = useState(false);
 
-  const platformCommissionRate = 9.9; // 9.9% commission
+  const platformCommissionRate = 0; // MVP: 0% platform commission
 
   const calculateCommission = (amount: number) => {
     return (amount * platformCommissionRate) / 100;
   };
 
   const calculateEscrowAmount = (amount: number) => {
-    return amount + calculateCommission(amount);
+    return amount;
   };
 
   const createAgreement = () => {
@@ -113,8 +113,8 @@ export function ProjectAgreement({ user, projectId, onAgreementSigned }: Project
       platformCommission: calculateCommission(newAgreement.totalAmount),
       revisionCount: newAgreement.revisionCount,
       refundPolicy: 'Partial or full refund depending on completion quality and stage of project.',
-      approvalProcess: 'Client must approve work to release payment. Auto-release after 7 days if no response.',
-      disputeProcess: 'Disputes must be raised within 14 days. Neutral resolution by platform team.',
+      approvalProcess: 'Client pays the student directly before work starts, then marks the project complete after delivery.',
+      disputeProcess: 'Disputes are handled through communication and reviews in the MVP. Workzy does not hold funds.',
       status: 'draft',
       createdAt: new Date().toISOString()
     };
@@ -145,8 +145,7 @@ export function ProjectAgreement({ user, projectId, onAgreementSigned }: Project
     setAgreements(prev => prev.map(agreement => {
       if (agreement.id === agreementId) {
         const signature = {
-          date: new Date().toISOString(),
-          ipAddress: '192.168.1.1' // Mock IP address
+          date: new Date().toISOString()
         };
 
         const updatedAgreement = {
@@ -342,8 +341,8 @@ export function ProjectAgreement({ user, projectId, onAgreementSigned }: Project
                   />
                   {newAgreement.totalAmount > 0 && (
                     <div className="mt-2 text-xs text-muted-foreground">
-                      <p>Platform Commission (9.9%): ₹{calculateCommission(newAgreement.totalAmount).toFixed(2)}</p>
-                      <p>Total Escrow Amount: ₹{calculateEscrowAmount(newAgreement.totalAmount).toFixed(2)}</p>
+                      <p>Platform Commission (0%): ₹{calculateCommission(newAgreement.totalAmount).toFixed(2)}</p>
+                      <p>Direct Payment Amount: ₹{calculateEscrowAmount(newAgreement.totalAmount).toFixed(2)}</p>
                     </div>
                   )}
                 </div>
@@ -463,7 +462,7 @@ export function ProjectAgreement({ user, projectId, onAgreementSigned }: Project
                     <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Escrow</p>
+                        <p className="text-sm text-muted-foreground">Direct Payment</p>
                         <p className="text-foreground">₹{agreement.escrowAmount.toLocaleString()}</p>
                       </div>
                     </div>
@@ -602,11 +601,11 @@ export function ProjectAgreement({ user, projectId, onAgreementSigned }: Project
                         <p className="text-foreground">₹{selectedAgreement.totalAmount.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Platform Commission (9.9%):</p>
+                        <p className="text-muted-foreground">Platform Commission (0%):</p>
                         <p className="text-foreground">₹{selectedAgreement.platformCommission.toFixed(2)}</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Escrow Amount:</p>
+                        <p className="text-muted-foreground">Direct Payment Amount:</p>
                         <p className="text-foreground">₹{selectedAgreement.escrowAmount.toLocaleString()}</p>
                       </div>
                     </div>

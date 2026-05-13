@@ -18,6 +18,7 @@ function mapProposal(row) {
     timeline: row.timeline,
     status: normEnum(row.status) || row.status,
     hireOfferStatus: normEnum(row.hire_offer_status),
+    projectId: row.project_id || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     freelancer: row.freelancer_name
@@ -70,9 +71,11 @@ async function listJobProposals(jobId, requesterId) {
     throw createError('Unauthorized to view proposals for this job', 403);
   }
   const result = await query(
-    `select p.*, u.name freelancer_name, u.email freelancer_email, u.avatar freelancer_avatar,
+    `select p.*, pr.id project_id, u.name freelancer_name, u.email freelancer_email, u.avatar freelancer_avatar,
             u.skills freelancer_skills, u.rating freelancer_rating, u.bio freelancer_bio, u.hourly_rate freelancer_hourly_rate
-     from proposals p join users u on u.id = p.freelancer_id
+     from proposals p
+     join users u on u.id = p.freelancer_id
+     left join projects pr on pr.proposal_id = p.id
      where p.job_id = $1 order by p.created_at desc`,
     [jobId]
   );
@@ -169,7 +172,7 @@ async function respondToHireOffer(proposalId, freelancerId, accept) {
       await tx.query(`update jobs set status = 'IN_PROGRESS' where id = $1`, [proposal.job_id]);
       const project = await tx.query(
         `insert into projects (job_id, proposal_id, client_id, freelancer_id, title, description, budget, timeline, status)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,'ACTIVE') returning *`,
+         values ($1,$2,$3,$4,$5,$6,$7,$8,'payment_pending') returning *`,
         [
           proposal.job_id,
           proposal.id,
@@ -185,22 +188,22 @@ async function respondToHireOffer(proposalId, freelancerId, accept) {
       await createNotification(tx, {
         userId: proposal.client_id,
         title: 'Hire offer accepted',
-        message: `${proposal.freelancer_name} accepted your hire offer for "${proposal.title}".`,
+        message: `${proposal.freelancer_name} accepted your hire offer for "${proposal.title}". Payment is now pending.`,
         type: 'hire_offer_accepted',
         data: { proposalId, projectId, jobId: proposal.job_id },
       });
       await createNotification(tx, {
         userId: proposal.freelancer_id,
-        title: 'Project started',
-        message: `You accepted the hire for "${proposal.title}". The project is now active.`,
-        type: 'project_started',
+        title: 'Payment pending',
+        message: `You accepted the hire for "${proposal.title}". Share payment details and wait for direct payment.`,
+        type: 'payment_pending',
         data: { proposalId, projectId, jobId: proposal.job_id },
       });
       await createNotification(tx, {
         userId: proposal.client_id,
-        title: 'Project started',
-        message: `Your project "${proposal.title}" is now active with your hired freelancer.`,
-        type: 'project_started',
+        title: 'Payment pending',
+        message: `Pay the freelancer directly to activate "${proposal.title}".`,
+        type: 'payment_pending',
         data: { proposalId, projectId, jobId: proposal.job_id },
       });
       const updated = await tx.query(`select * from proposals where id = $1`, [proposalId]);
@@ -255,7 +258,7 @@ async function acceptProposal(proposalId, clientId) {
     await tx.query(`update jobs set status = 'IN_PROGRESS' where id = $1`, [proposal.job_id]);
     const project = await tx.query(
       `insert into projects (job_id, proposal_id, client_id, freelancer_id, title, description, budget, timeline, status)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,'ACTIVE') returning *`,
+       values ($1,$2,$3,$4,$5,$6,$7,$8,'payment_pending') returning *`,
       [
         proposal.job_id,
         proposal.id,
@@ -269,16 +272,16 @@ async function acceptProposal(proposalId, clientId) {
     );
     await createNotification(tx, {
       userId: proposal.freelancer_id,
-      title: 'Project started',
-      message: `Your proposal for "${proposal.title}" was accepted. The project is now active.`,
-      type: 'project_started',
+      title: 'Payment pending',
+      message: `Your proposal for "${proposal.title}" was accepted. Share payment details and wait for direct payment.`,
+      type: 'payment_pending',
       data: { proposalId: proposal.id, projectId: project.rows[0].id, jobId: proposal.job_id },
     });
     await createNotification(tx, {
       userId: proposal.client_id,
-      title: 'Project started',
-      message: `Your project "${proposal.title}" is now active with your hired freelancer.`,
-      type: 'project_started',
+      title: 'Payment pending',
+      message: `Pay the freelancer directly to activate "${proposal.title}".`,
+      type: 'payment_pending',
       data: { proposalId: proposal.id, projectId: project.rows[0].id, jobId: proposal.job_id },
     });
     return { proposal: mapProposal(updated.rows[0]), project: project.rows[0] };

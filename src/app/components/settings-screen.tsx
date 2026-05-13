@@ -415,21 +415,9 @@ export function SettingsScreen({ user, onLogout }: SettingsScreenProps) {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                        <div>
-                          <h4 className="text-sm text-foreground">MacBook Pro - Chrome</h4>
-                          <p className="text-xs text-muted-foreground">Mumbai, India • Active now</p>
-                        </div>
-                        <Badge variant="secondary">Current</Badge>
-                      </div>
-                      
-                      <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                        <div>
-                          <h4 className="text-sm text-foreground">iPhone - Safari</h4>
-                          <p className="text-xs text-muted-foreground">Mumbai, India • 2 hours ago</p>
-                        </div>
-                        <Button variant="outline" size="sm">Revoke</Button>
-                      </div>
+                    <p className="text-sm text-muted-foreground">
+                      Session history will appear here after real device tracking is connected.
+                    </p>
                     </div>
                   </CardContent>
                 </Card>

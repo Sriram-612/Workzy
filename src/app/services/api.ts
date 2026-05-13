@@ -18,8 +18,7 @@ const getApiBaseUrl = (): string => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-// Mock data when the API is unreachable (never used for /auth — real credentials only)
-const SMART_FALLBACK = true;
+// Do not invent marketplace data when the API is unavailable.
 
 /** Auth, messaging, and profile mutations must hit the real API (no mock fallback). */
 function requiresRealBackend(endpoint: string, options: RequestInit = {}): boolean {
@@ -27,6 +26,7 @@ function requiresRealBackend(endpoint: string, options: RequestInit = {}): boole
   if (endpoint.startsWith('/messages')) return true;
   if (endpoint.startsWith('/users/lookup')) return true;
   if (endpoint.startsWith('/proposals')) return true;
+  if (endpoint.startsWith('/payments')) return true;
   if (endpoint.startsWith('/jobs/user')) return true;
   if (endpoint === '/jobs' || endpoint.startsWith('/jobs?')) return true;
   if (endpoint.startsWith('/notifications')) return true;
@@ -49,6 +49,11 @@ interface ApiResponse<T = any> {
   projects?: any;
   conversations?: any;
   notifications?: any;
+  payments?: any;
+  payment?: any;
+  keyId?: string;
+  order?: any;
+  checkout?: any;
   token?: string;
   stats?: any;
   pagination?: {
@@ -139,96 +144,9 @@ async function apiRequest<T>(
 
     return await response.json();
   } catch (error) {
-    if (requiresRealBackend(endpoint, options)) {
-      console.error('API request failed:', error);
-      throw error instanceof Error ? error : new Error('Authentication failed');
-    }
-    if (SMART_FALLBACK) {
-      console.warn('Backend unavailable, using mock data:', error);
-      return getMockResponse<T>(endpoint, options);
-    }
     console.error('API Request Error:', error);
     throw error instanceof Error ? error : new Error('Request failed');
   }
-}
-
-// Mock response generator for development (auth is never mocked — see apiRequest)
-function getMockResponse<T>(endpoint: string, options: RequestInit = {}): ApiResponse<T> {
-  const method = options.method || 'GET';
-
-  // Mock jobs responses
-  if (endpoint.startsWith('/jobs')) {
-    if (method === 'POST' && endpoint === '/jobs') {
-      // Mock job creation
-      const mockJob = {
-        id: 'mock-job-' + Date.now(),
-        title: 'Mock Job',
-        description: 'This is a mock job created in development mode',
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString()
-      };
-      
-      return {
-        message: 'Job created successfully',
-        job: mockJob
-      } as ApiResponse<T>;
-    }
-    
-    if (method === 'GET' && endpoint === '/jobs/user/posted') {
-      return {
-        message: 'Jobs retrieved successfully',
-        jobs: []
-      } as ApiResponse<T>;
-    }
-    
-    if (method === 'GET') {
-      return {
-        message: 'Jobs retrieved successfully',
-        jobs: [],
-        pagination: {
-          page: 1,
-          limit: 20,
-          total: 0,
-          pages: 0
-        }
-      } as ApiResponse<T>;
-    }
-  }
-  
-  // Mock projects responses
-  if (endpoint.startsWith('/projects')) {
-    if (endpoint === '/projects/user') {
-      return {
-        message: 'Projects retrieved successfully',
-        projects: []
-      } as ApiResponse<T>;
-    }
-    
-    if (endpoint === '/projects/stats/overview') {
-      return {
-        message: 'Stats retrieved successfully',
-        stats: {
-          totalEarnings: 0,
-          activeProjects: 0,
-          completedProjects: 0
-        }
-      } as ApiResponse<T>;
-    }
-  }
-  
-  // Mock notifications responses
-  if (endpoint.startsWith('/notifications')) {
-    return {
-      message: 'Notifications retrieved successfully',
-      notifications: []
-    } as ApiResponse<T>;
-  }
-  
-  // Default mock response
-  return {
-    message: 'Mock response',
-    data: [] as any
-  } as ApiResponse<T>;
 }
 
 // Auth API
@@ -472,12 +390,6 @@ export const projectsAPI = {
     });
   },
 
-  releaseEscrow: async (projectId: string) => {
-    return apiRequest(`/projects/${projectId}/release-escrow`, {
-      method: 'POST',
-    });
-  },
-
   getProjectStats: async () => {
     return apiRequest('/projects/stats/overview');
   },
@@ -523,24 +435,59 @@ export const messagesAPI = {
 
 // Payments API
 export const paymentsAPI = {
+  createPayment: async (paymentData: {
+    projectId: string;
+    amount?: number;
+    currency?: string;
+    studentUpiId?: string;
+    studentPaymentNote?: string;
+  }) => {
+    return apiRequest('/payments/create-payment', {
+      method: 'POST',
+      body: JSON.stringify(paymentData),
+    });
+  },
+
+  verifyPayment: async (verificationData: {
+    paymentId?: string;
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    paymentMethod?: string;
+  }) => {
+    return apiRequest('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(verificationData),
+    });
+  },
+
+  getProjectPayments: async (projectId: string) => {
+    return apiRequest(`/payments/project/${projectId}`);
+  },
+
+  getUserPayments: async (userId: string) => {
+    return apiRequest(`/payments/user/${userId}`);
+  },
+
+  updatePaymentStatus: async (paymentId: string, paymentStatus: 'pending' | 'paid_directly' | 'failed' | 'cancelled') => {
+    return apiRequest('/payments/status', {
+      method: 'PATCH',
+      body: JSON.stringify({ paymentId, paymentStatus }),
+    });
+  },
+
   createPaymentIntent: async (paymentData: {
     projectId: string;
     amount: number;
   }) => {
-    return apiRequest('/payments/create-intent', {
-      method: 'POST',
-      body: JSON.stringify(paymentData),
-    });
+    return paymentsAPI.createPayment(paymentData);
   },
 
   confirmPayment: async (confirmData: {
     paymentIntentId: string;
     projectId: string;
   }) => {
-    return apiRequest('/payments/confirm', {
-      method: 'POST',
-      body: JSON.stringify(confirmData),
-    });
+    throw new Error('Escrow confirmations are disabled. Use verifyPayment for direct Razorpay payments.');
   },
 
   getPaymentHistory: async (page = 1, limit = 20) => {

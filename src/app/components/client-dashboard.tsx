@@ -135,8 +135,8 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <Link to="/agreements" className="text-muted-foreground hover:text-primary">
                   Agreements
                 </Link>
-                <Link to="/escrow" className="text-muted-foreground hover:text-primary">
-                  Escrow
+                <Link to="/payments" className="text-muted-foreground hover:text-primary">
+                  Payments
                 </Link>
                 <Link to="/notifications" className="text-muted-foreground hover:text-primary">
                   Notifications
@@ -193,6 +193,12 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <Button className="flex items-center gap-2">
                   <Plus className="w-4 h-4" />
                   Post New Job
+                </Button>
+              </Link>
+              <Link to="/payments">
+                <Button variant="secondary" className="flex items-center gap-2">
+                  <IndianRupee className="w-4 h-4" />
+                  Pay Freelancer
                 </Button>
               </Link>
               <Link to="/search-freelancers">
@@ -292,6 +298,8 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                     activeProjects.map(project => {
                       const freelancerName = getProjectFreelancerName(project);
                       const progress = getProjectProgress(project);
+                      const status = getProjectStatus(project).toLowerCase();
+                      const needsPayment = !['active', 'paid_directly', 'submitted', 'completed', 'cancelled'].includes(status);
 
                       return (
                         <div key={project.id} className="p-4 border border-border rounded-lg hover:bg-muted transition-colors">
@@ -308,8 +316,8 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                               {freelancerName}
                             </div>
                           </div>
-                          <Badge variant={getProjectStatus(project).toUpperCase() === 'ACTIVE' ? 'default' : 'secondary'}>
-                            {getProjectStatus(project).toLowerCase()}
+                          <Badge variant={status === 'active' ? 'default' : 'secondary'}>
+                            {status.replace('_', ' ')}
                           </Badge>
                         </div>
                         
@@ -331,6 +339,16 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                           </div>
                           <Progress value={progress} className="h-2" />
                         </div>
+                        {needsPayment && (
+                          <div className="mt-3">
+                            <Link to={`/payments/${project.id}`}>
+                              <Button size="sm" className="w-full gap-2">
+                                <IndianRupee className="w-4 h-4" />
+                                Pay Freelancer
+                              </Button>
+                            </Link>
+                          </div>
+                        )}
                         </div>
                       );
                     })
@@ -430,80 +448,14 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {/* Mock recommended freelancer */}
-                  <div className="p-3 border border-border rounded-lg bg-white dark:bg-card">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                          AR
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="text-sm text-foreground">Arjun React</h4>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          4.9 • Top Rated
-                        </div>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 text-xs">
-                        Available
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      <Badge variant="outline" className="text-xs">React</Badge>
-                      <Badge variant="outline" className="text-xs">Node.js</Badge>
-                      <Badge variant="outline" className="text-xs">TypeScript</Badge>
-                    </div>
-                    
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-muted-foreground">₹800/hr</span>
-                      <div className="flex gap-1">
-                        <Button size="sm" variant="outline" className="h-6 text-xs">Save</Button>
-                        <Button size="sm" className="h-6 text-xs">Hire</Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 border border-border rounded-lg bg-white dark:bg-card">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs bg-purple-100 text-purple-600">
-                          PD
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="text-sm text-foreground">Priya Designer</h4>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          4.8 • Rising Talent
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        Busy
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      <Badge variant="outline" className="text-xs">UI/UX</Badge>
-                      <Badge variant="outline" className="text-xs">Figma</Badge>
-                      <Badge variant="outline" className="text-xs">Branding</Badge>
-                    </div>
-                    
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-muted-foreground">₹600/hr</span>
-                      <div className="flex gap-1">
-                        <Button size="sm" variant="outline" className="h-6 text-xs">Save</Button>
-                        <Button size="sm" variant="outline" className="h-6 text-xs">Contact</Button>
-                      </div>
-                    </div>
-                  </div>
-
+              <CardContent>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Real student profiles appear here after students complete their Workzy profiles.</p>
                   <Link to="/search-freelancers" className="block">
                     <Button size="sm" variant="outline" className="w-full">Browse All Freelancers</Button>
                   </Link>
                 </div>
+              </CardContent>
               </CardContent>
             </Card>
 
@@ -577,41 +529,16 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
             </Card>
 
             {/* Budget Helper */}
+            {/* Budget Helper */}
             <Card className="border-amber-200 bg-amber-50/30 dark:bg-amber-950/20">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
                   <IndianRupee className="w-4 h-4" />
-                  Market Rates Guide
+                  Budget Guidance
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">React Development</span>
-                    <span className="text-foreground">₹600-1500/hr</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">UI/UX Design</span>
-                    <span className="text-foreground">₹400-1000/hr</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Content Writing</span>
-                    <span className="text-foreground">₹300-700/hr</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Video Editing</span>
-                    <span className="text-foreground">₹500-1200/hr</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Data Entry</span>
-                    <span className="text-foreground">₹150-400/hr</span>
-                  </div>
-                  <div className="text-center pt-2">
-                    <Link to="/search-freelancers" className="text-primary hover:underline text-xs">
-                      View detailed market analysis
-                    </Link>
-                  </div>
-                </div>
+                <p className="text-xs text-muted-foreground">Use the real bids you receive from students to compare project cost. Workzy does not show fake market rates.</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -656,12 +583,12 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
               </Card>
             </Link>
 
-            <Link to="/escrow">
+            <Link to="/payments">
               <Card className="hover:shadow-md transition-shadow cursor-pointer bg-amber-50/50 dark:bg-amber-950/20 border-amber-200">
                 <CardContent className="p-6 text-center">
                   <Shield className="w-8 h-8 text-amber-600 mx-auto mb-2" />
-                  <p className="text-sm text-foreground">Escrow</p>
-                  <p className="text-xs text-muted-foreground">Secure payments</p>
+                  <p className="text-sm text-foreground">Payments</p>
+                  <p className="text-xs text-muted-foreground">Pay directly</p>
                 </CardContent>
               </Card>
             </Link>
@@ -705,7 +632,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
           </div>
         </motion.div>
 
-        {/* Trending Categories & Hiring Insights */}
+              Project Categories
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -714,8 +641,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg text-foreground flex items-center gap-2">
-              🔥 Trending Categories
-              <Badge variant="secondary" className="text-xs">High Activity</Badge>
+              Project Categories
             </h2>
             <Link to="/browse-jobs" className="text-sm text-primary hover:underline">
               View all categories
@@ -728,8 +654,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">⚛️</div>
                   <p className="text-sm text-foreground font-medium">Programming</p>
-                  <p className="text-xs text-muted-foreground">₹600-1500/hr</p>
-                  <Badge variant="outline" className="text-xs mt-1">250+ freelancers</Badge>
+                  <p className="text-xs text-muted-foreground">Post a real job</p>
                 </CardContent>
               </Card>
             </Link>
@@ -739,8 +664,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">🎨</div>
                   <p className="text-sm text-foreground font-medium">UI/UX Design</p>
-                  <p className="text-xs text-muted-foreground">₹400-1000/hr</p>
-                  <Badge variant="outline" className="text-xs mt-1">180+ freelancers</Badge>
+                  <p className="text-xs text-muted-foreground">Post a real job</p>
                 </CardContent>
               </Card>
             </Link>
@@ -750,8 +674,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">✍️</div>
                   <p className="text-sm text-foreground font-medium">Content Writing</p>
-                  <p className="text-xs text-muted-foreground">₹300-700/hr</p>
-                  <Badge variant="outline" className="text-xs mt-1">320+ freelancers</Badge>
+                  <p className="text-xs text-muted-foreground">Post a real job</p>
                 </CardContent>
               </Card>
             </Link>
@@ -761,8 +684,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">🎬</div>
                   <p className="text-sm text-foreground font-medium">Video Editing</p>
-                  <p className="text-xs text-muted-foreground">₹500-1200/hr</p>
-                  <Badge variant="outline" className="text-xs mt-1">90+ freelancers</Badge>
+                  <p className="text-xs text-muted-foreground">Post a real job</p>
                 </CardContent>
               </Card>
             </Link>
@@ -772,8 +694,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">🌐</div>
                   <p className="text-sm text-foreground font-medium">Website Dev</p>
-                  <p className="text-xs text-muted-foreground">₹500-1200/hr</p>
-                  <Badge variant="outline" className="text-xs mt-1">200+ freelancers</Badge>
+                  <p className="text-xs text-muted-foreground">Post a real job</p>
                 </CardContent>
               </Card>
             </Link>
@@ -783,8 +704,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl mb-2">🎓</div>
                   <p className="text-sm text-foreground font-medium">Tutoring</p>
-                  <p className="text-xs text-muted-foreground">₹300-800/hr</p>
-                  <Badge variant="outline" className="text-xs mt-1">150+ freelancers</Badge>
+                  <p className="text-xs text-muted-foreground">Post a real job</p>
                 </CardContent>
               </Card>
             </Link>
@@ -799,7 +719,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
           className="mt-8"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg text-foreground">✓ Hire Verified College Students</h2>
+            <h2 className="text-lg text-foreground">✓ Student Profiles</h2>
             <Link to="/search-freelancers" className="text-sm text-primary hover:underline">
               Browse all students
             </Link>
@@ -810,14 +730,13 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
             <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
               <CardContent className="p-6">
                 <div className="text-3xl mb-3 text-center">🎓</div>
-                <h3 className="text-sm font-medium text-foreground mb-2 text-center">Verified Students</h3>
+                <h3 className="text-sm font-medium text-foreground mb-2 text-center">Student Profiles</h3>
                 <p className="text-xs text-muted-foreground text-center mb-4">
-                  All students are verified with college emails from top universities
+                  Student details appear only from completed profiles.
                 </p>
                 <ul className="text-xs text-muted-foreground space-y-2">
-                  <li>• IIT, BITS, NIT & more</li>
-                  <li>• Email-verified profiles</li>
-                  <li>• Fresh, innovative talent</li>
+                  <li>Real profile details only</li>
+                  <li>No fake student data</li>
                 </ul>
               </CardContent>
             </Card>
@@ -826,9 +745,9 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
             <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20">
               <CardContent className="p-6">
                 <div className="text-3xl mb-3 text-center">✓</div>
-                <h3 className="text-sm font-medium text-foreground mb-2 text-center">Quality Guaranteed</h3>
+                <h3 className="text-sm font-medium text-foreground mb-2 text-center">Profile Signals</h3>
                 <p className="text-xs text-muted-foreground text-center mb-4">
-                  Track record and performance metrics for every freelancer
+                  Show only metrics recorded by Workzy activity
                 </p>
                 <ul className="text-xs text-muted-foreground space-y-2">
                   <li>• Response rate tracking</li>
@@ -842,14 +761,14 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
             <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-950/20">
               <CardContent className="p-6">
                 <div className="text-3xl mb-3 text-center">🔒</div>
-                <h3 className="text-sm font-medium text-foreground mb-2 text-center">Secure Escrow</h3>
+                <h3 className="text-sm font-medium text-foreground mb-2 text-center">Direct UPI Payments</h3>
                 <p className="text-xs text-muted-foreground text-center mb-4">
-                  Payment protection with milestone-based escrow system
+                  Fast client-to-student payments with 0% Workzy commission
                 </p>
                 <ul className="text-xs text-muted-foreground space-y-2">
-                  <li>• Funds held in escrow</li>
-                  <li>• Release on completion</li>
-                  <li>• 9.9% platform fee</li>
+                  <li>• UPI-first checkout</li>
+                  <li>• Razorpay verification</li>
+                  <li>• 0% platform fee</li>
                 </ul>
               </CardContent>
             </Card>
@@ -861,7 +780,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <div className="text-2xl">💡</div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">Ready to hire skilled college students?</p>
-                  <p className="text-xs text-muted-foreground">Post your first job and get proposals from verified students in 24 hours.</p>
+                  <p className="text-xs text-muted-foreground">Post your first job and get proposals from Student Profiles in 24 hours.</p>
                 </div>
                 <Link to="/post-job" className="ml-auto">
                   <Button size="sm">Post a Job</Button>
@@ -874,3 +793,4 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
     </div>
   );
 }
+

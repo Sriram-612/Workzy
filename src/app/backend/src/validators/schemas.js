@@ -90,8 +90,30 @@ const lookupEmailQuerySchema = z.object({
   body: z.object({}).optional(),
   params: z.object({}).optional()
 });
-const paymentIntentSchema = z.object({
-  body: z.object({ projectId: z.string().uuid(), amount: z.number().positive(), currency: z.string().default('usd') })
+const createPaymentSchema = z.object({
+  body: z.object({
+    projectId: z.string().uuid(),
+    amount: z.number().positive().optional(),
+    currency: z.string().default('INR'),
+    studentUpiId: z.string().max(120).optional(),
+    studentPaymentNote: z.string().max(500).optional()
+  })
+});
+const verifyPaymentSchema = z.object({
+  body: z.object({
+    paymentId: z.string().uuid().optional(),
+    razorpay_order_id: z.string().min(1),
+    razorpay_payment_id: z.string().min(1),
+    razorpay_signature: z.string().min(1),
+    paymentMethod: z.string().optional()
+  })
+});
+const updatePaymentStatusSchema = z.object({
+  body: z.object({
+    paymentId: z.string().uuid(),
+    paymentStatus: z.enum(['pending', 'paid_directly', 'failed', 'cancelled']).optional(),
+    status: z.enum(['pending', 'paid_directly', 'failed', 'cancelled']).optional()
+  }).refine((data) => data.paymentStatus || data.status, { message: 'paymentStatus is required' })
 });
 const reviewSchema = z.object({
   body: z.object({
@@ -118,6 +140,8 @@ module.exports = {
   messageSchema,
   lookupEmailQuerySchema,
   hireResponseSchema,
-  paymentIntentSchema,
+  createPaymentSchema,
+  verifyPaymentSchema,
+  updatePaymentStatusSchema,
   reviewSchema
 };

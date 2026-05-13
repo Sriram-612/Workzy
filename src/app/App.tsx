@@ -193,7 +193,9 @@ export default function App() {
                 <Route path="/profile" element={<ProfileScreen user={user} onUpdate={updateUser} />} />
                 <Route path="/settings" element={<SettingsScreen user={user} onLogout={handleLogout} />} />
                 <Route path="/agreements" element={<ProjectAgreement user={user} />} />
-                <Route path="/escrow" element={<EscrowPayment user={user} />} />
+                <Route path="/payments" element={<EscrowPayment user={user} />} />
+                <Route path="/payments/:projectId" element={<EscrowPayment user={user} />} />
+                <Route path="/escrow" element={<Navigate to="/payments" replace />} />
               </>
             )}
 

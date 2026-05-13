@@ -327,7 +327,7 @@ export function ProfileSetup({ user, onComplete }: ProfileSetupProps) {
                   type="url"
                   value={formData.portfolio}
                   onChange={(e) => setFormData({ ...formData, portfolio: e.target.value })}
-                  placeholder="https://yourportfolio.com"
+                  placeholder="https://..."
                 />
               </div>
             </div>
@@ -408,16 +408,16 @@ export function ProfileSetup({ user, onComplete }: ProfileSetupProps) {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="budget">Typical Project Budget (USD)</Label>
+                <Label htmlFor="budget">Typical Project Budget (INR)</Label>
                 <Select value={formData.budget} onValueChange={(value) => setFormData({ ...formData, budget: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select budget range" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="500-1000">$500 - $1,000</SelectItem>
-                    <SelectItem value="1000-5000">$1,000 - $5,000</SelectItem>
-                    <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
-                    <SelectItem value="10000+">$10,000+</SelectItem>
+                    <SelectItem value="5000-10000">₹5,000 - ₹10,000</SelectItem>
+                    <SelectItem value="10000-50000">₹10,000 - ₹50,000</SelectItem>
+                    <SelectItem value="50000-100000">₹50,000 - ₹1,00,000</SelectItem>
+                    <SelectItem value="100000+">₹1,00,000+</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

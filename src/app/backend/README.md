@@ -75,9 +75,12 @@ The API runs at `http://localhost:3001`, and the frontend expects `VITE_API_URL=
 - `POST /api/messages`
 - `GET /api/messages/conversations`
 - `GET /api/messages/conversations/:conversationId`
-- `POST /api/payments/create-intent`
-- `POST /api/payments/confirm`
-- `POST /api/projects/:id/release-escrow`
+- `POST /api/payments/create-payment`
+- `POST /api/payments/verify`
+- `GET /api/payments/project/:projectId`
+- `GET /api/payments/user/:userId`
+- `PATCH /api/payments/status`
+- `POST /api/payments/webhook`
 - `POST /api/reviews`
 - `GET /api/notifications`
 

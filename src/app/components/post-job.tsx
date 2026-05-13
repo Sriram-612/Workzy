@@ -390,7 +390,7 @@ export function PostJob({ user }: PostJobProps) {
 
               {formData.budgetType === 'fixed' ? (
                 <div>
-                  <Label htmlFor="fixedBudget">Fixed Budget (USD)*</Label>
+                  <Label htmlFor="fixedBudget">Fixed Budget (INR)*</Label>
                   <Input
                     id="fixedBudget"
                     type="number"
@@ -402,7 +402,7 @@ export function PostJob({ user }: PostJobProps) {
                 </div>
               ) : (
                 <div>
-                  <Label htmlFor="hourlyRate">Hourly Rate (USD)*</Label>
+                  <Label htmlFor="hourlyRate">Hourly Rate (INR)*</Label>
                   <Input
                     id="hourlyRate"
                     type="number"
@@ -579,9 +579,9 @@ export function PostJob({ user }: PostJobProps) {
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
-                        {formData.budgetType === 'fixed' 
-                          ? `$${formData.fixedBudget}` 
-                          : `$${formData.hourlyRate}/hr`
+                        {formData.budgetType === 'fixed'
+                          ? `₹${formData.fixedBudget}`
+                          : `₹${formData.hourlyRate}/hr`
                         }
                       </div>
                       <div className="flex items-center gap-1">
