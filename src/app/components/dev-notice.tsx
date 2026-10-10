@@ -2,6 +2,7 @@ import { AlertCircle, X, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Alert, AlertDescription } from './ui/alert';
+import { ENV } from '../config/env';
 
 export function DevNotice() {
   const [isVisible, setIsVisible] = useState(() => {
@@ -15,7 +16,9 @@ export function DevNotice() {
     // Check backend connectivity
     const checkBackend = async () => {
       try {
-        const response = await fetch('/health');
+        const baseUrl = ENV.API_URL ? ENV.API_URL.replace(/\/api\/?$/, '') : '';
+        const healthUrl = baseUrl ? `${baseUrl}/health` : '/health';
+        const response = await fetch(healthUrl);
         if (response.ok) {
           setBackendStatus('connected');
         } else {
@@ -39,6 +42,8 @@ export function DevNotice() {
 
   if (!isVisible) return null;
 
+  const isProduction = typeof import.meta !== 'undefined' && !import.meta.env?.DEV;
+
   const getNoticeContent = () => {
     switch (backendStatus) {
       case 'checking':
@@ -57,7 +62,9 @@ export function DevNotice() {
         return {
           color: 'amber',
           icon: AlertCircle,
-          message: 'Backend disconnected. Real marketplace data may not load. Run "./start-backend.sh" to connect to your database.'
+          message: isProduction
+            ? 'Backend API is not connected. Deploy your backend service and set VITE_API_URL in Vercel project settings.'
+            : 'Backend disconnected. Run "npm run dev:backend" or "npm run dev:all" to connect to your local database.'
         };
     }
   };
