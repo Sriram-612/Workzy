@@ -1,12 +1,21 @@
 const dotenv = require('dotenv');
 
 dotenv.config();
+dotenv.config({ path: '.env.local', override: false });
+dotenv.config({ path: 'src/app/backend/.env', override: false });
+
+const nodeEnv = process.env.NODE_ENV || 'development';
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  (nodeEnv === 'production' ? '' : 'postgresql://postgres:sriram123@localhost:5432/workzy');
 
 const env = {
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   port: Number(process.env.PORT || 3001),
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:sriram123@localhost:5432/workzy',
+  databaseUrl,
   jwtSecret: process.env.JWT_SECRET || 'dev-only-change-this-secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',

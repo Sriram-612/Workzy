@@ -8,13 +8,26 @@ const isRemoteDb =
     env.databaseUrl || ''
   ) || process.env.NODE_ENV === 'production';
 
-const pool = new Pool({
-  connectionString: env.databaseUrl,
-  ssl: isRemoteDb ? { rejectUnauthorized: false } : undefined,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
-});
+const missingDatabaseUrlError = () =>
+  new Error('DATABASE_URL is not configured. Add your Neon pooled connection string to the Vercel project environment variables.');
+
+const pool = env.databaseUrl
+  ? new Pool({
+      connectionString: env.databaseUrl,
+      ssl: isRemoteDb ? { rejectUnauthorized: false } : undefined,
+      max: env.nodeEnv === 'production' ? 2 : 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000
+    })
+  : {
+      query: async () => {
+        throw missingDatabaseUrlError();
+      },
+      connect: async () => {
+        throw missingDatabaseUrlError();
+      },
+      on: () => {}
+    };
 
 pool.on('error', (error) => {
   console.error('Unexpected PostgreSQL pool error', error.message || error);

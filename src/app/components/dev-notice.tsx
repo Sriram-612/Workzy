@@ -16,10 +16,11 @@ export function DevNotice() {
     // Check backend connectivity
     const checkBackend = async () => {
       try {
-        const baseUrl = ENV.API_URL ? ENV.API_URL.replace(/\/api\/?$/, '') : '';
-        const healthUrl = baseUrl ? `${baseUrl}/health` : '/health';
+        const apiUrl = ENV.API_URL || '/api';
+        const healthUrl = `${apiUrl.replace(/\/$/, '')}/health`;
         const response = await fetch(healthUrl);
-        if (response.ok) {
+        const payload = await response.json().catch(() => null);
+        if (response.ok && payload?.database === 'connected') {
           setBackendStatus('connected');
         } else {
           setBackendStatus('disconnected');
@@ -63,7 +64,7 @@ export function DevNotice() {
           color: 'amber',
           icon: AlertCircle,
           message: isProduction
-            ? 'Backend API is not connected. Deploy your backend service and set VITE_API_URL in Vercel project settings.'
+            ? 'Backend or database is not connected. Add DATABASE_URL in Vercel, redeploy, and check /api/health.'
             : 'Backend disconnected. Run "npm run dev:backend" or "npm run dev:all" to connect to your local database.'
         };
     }
