@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { User } from '../App';
-import { jobsAPI } from '../services/api';
+import { jobsAPI, projectsAPI, proposalsAPI } from '../services/api';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -22,13 +22,19 @@ interface FreelancerDashboardProps {
   onLogout: () => void;
 }
 
-const recentJobs: any[] = [];
-
-const recentProposals: any[] = [];
-
 export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps) {
+  const [stats, setStats] = useState({
+    earnings: '₹0',
+    activeJobs: 0,
+    completedJobs: 0,
+    rating: Number(user.rating || 0)
+  });
+  const [recentJobs, setRecentJobs] = useState<any[]>([]);
+  const [recentProposals, setRecentProposals] = useState<any[]>([]);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
   const [savedJobsList, setSavedJobsList] = useState<{ id: string; title?: string; category?: string }[]>([]);
   const [savedJobsLoading, setSavedJobsLoading] = useState(false);
+
   const profileSteps = [
     { label: 'Basic info added', complete: Boolean(user.name && user.email) },
     { label: 'Skills listed', complete: Boolean(user.skills?.length) },
@@ -36,6 +42,71 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
     { label: 'Profile photo uploaded', complete: Boolean(user.avatar) },
   ];
   const profileStrength = Math.round((profileSteps.filter((step) => step.complete).length / profileSteps.length) * 100);
+
+  useEffect(() => {
+    if (user.role !== 'freelancer') return;
+    let isMounted = true;
+
+    const loadFreelancerData = async () => {
+      setDashboardLoading(true);
+      try {
+        const [statsRes, projectsRes, proposalsRes] = await Promise.allSettled([
+          projectsAPI.getProjectStats(),
+          projectsAPI.getUserProjects(),
+          proposalsAPI.getUserProposals(),
+        ]);
+
+        if (!isMounted) return;
+
+        if (statsRes.status === 'fulfilled' && statsRes.value?.stats) {
+          const s = statsRes.value.stats;
+          setStats({
+            earnings: `₹${Number(s.totalEarnings || 0).toLocaleString('en-IN')}`,
+            activeJobs: Number(s.activeProjects || 0),
+            completedJobs: Number(s.completedProjects || 0),
+            rating: Number(s.rating || user.rating || 0),
+          });
+        }
+
+        if (projectsRes.status === 'fulfilled' && projectsRes.value?.projects) {
+          const rawProjects = projectsRes.value.projects || [];
+          const formatted = rawProjects.map((p: any) => ({
+            id: p.id,
+            title: p.title || 'Untitled Project',
+            client: p.client_name || p.clientName || 'Assigned Client',
+            status: p.status || 'active',
+            budget: p.budget ? `₹${Number(p.budget).toLocaleString('en-IN')}` : 'Budget pending',
+            deadline: p.timeline || (p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Active'),
+            progress: p.status === 'completed' ? 100 : p.status === 'submitted' ? 85 : 50,
+          }));
+          setRecentJobs(formatted);
+        }
+
+        if (proposalsRes.status === 'fulfilled' && proposalsRes.value?.proposals) {
+          const rawProposals = proposalsRes.value.proposals || [];
+          const formatted = rawProposals.map((p: any) => ({
+            id: p.id,
+            jobId: p.jobId || p.job_id,
+            title: p.job?.title || p.job_title || 'Project Proposal',
+            submittedAt: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Recent',
+            status: String(p.status || 'pending').toLowerCase(),
+            budget: (p.proposedBudget || p.proposed_budget) ? `₹${Number(p.proposedBudget || p.proposed_budget).toLocaleString('en-IN')}` : '₹0',
+          }));
+          setRecentProposals(formatted);
+        }
+      } catch (err) {
+        console.error('Error loading freelancer dashboard:', err);
+      } finally {
+        if (isMounted) setDashboardLoading(false);
+      }
+    };
+
+    loadFreelancerData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user.role, user.id, user.rating]);
 
   useEffect(() => {
     if (user.role !== 'freelancer') return;
@@ -51,13 +122,6 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
       }
     })();
   }, [user.role, user.id]);
-
-  const stats = {
-    earnings: '₹0',
-    activeJobs: 0,
-    completedJobs: 0,
-    rating: 0
-  };
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -309,40 +373,47 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentJobs.length > 0 ? (
+                  {dashboardLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
+                      <p className="text-xs">Loading projects...</p>
+                    </div>
+                  ) : recentJobs.length > 0 ? (
                     recentJobs.map(job => (
-                      <div key={job.id} className="p-4 border border-border rounded-lg hover:bg-muted transition-colors">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h4 className="text-sm text-foreground mb-1">{job.title}</h4>
-                            <p className="text-xs text-muted-foreground">Client: {job.client}</p>
-                          </div>
-                          <Badge variant={job.status === 'in-progress' ? 'default' : 'secondary'}>
-                            {job.status}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                          <span className="flex items-center gap-1">
-                            <IndianRupee className="w-3 h-3" />
-                            {job.budget}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {job.deadline}
-                          </span>
-                        </div>
-
-                        {job.status === 'in-progress' && (
-                          <div className="mt-3">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-foreground">Progress</span>
-                              <span className="text-foreground">{job.progress}%</span>
+                      <Link key={job.id} to={`/payments/${job.id}`} className="block">
+                        <div className="p-4 border border-border rounded-lg hover:bg-muted/70 transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h4 className="text-sm font-medium text-foreground mb-1">{job.title}</h4>
+                              <p className="text-xs text-muted-foreground">Client: {job.client}</p>
                             </div>
-                            <Progress value={job.progress} className="h-2" />
+                            <Badge variant={job.status === 'completed' ? 'secondary' : 'default'} className="capitalize">
+                              {job.status}
+                            </Badge>
                           </div>
-                        )}
-                      </div>
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                            <span className="flex items-center gap-1 font-medium text-foreground">
+                              <IndianRupee className="w-3 h-3 text-muted-foreground" />
+                              {job.budget}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {job.deadline}
+                            </span>
+                          </div>
+
+                          {job.status !== 'completed' && (
+                            <div className="mt-3">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-foreground">Progress</span>
+                                <span className="text-foreground">{job.progress}%</span>
+                              </div>
+                              <Progress value={job.progress} className="h-2" />
+                            </div>
+                          )}
+                        </div>
+                      </Link>
                     ))
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
@@ -408,27 +479,34 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentProposals.length > 0 ? (
+                  {dashboardLoading ? (
+                    <div className="text-center py-6 text-muted-foreground">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+                      <p className="text-xs">Loading proposals...</p>
+                    </div>
+                  ) : recentProposals.length > 0 ? (
                     recentProposals.map(proposal => (
-                      <div key={proposal.id} className="p-3 border border-border rounded-lg hover:bg-muted transition-colors">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h4 className="text-xs text-foreground mb-1">{proposal.title}</h4>
-                            <p className="text-xs text-muted-foreground">Submitted: {proposal.submittedAt}</p>
+                      <Link key={proposal.id} to={proposal.jobId ? `/job/${proposal.jobId}` : '/browse-jobs'} className="block">
+                        <div className="p-3 border border-border rounded-lg hover:bg-muted/70 transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h4 className="text-xs font-medium text-foreground mb-1">{proposal.title}</h4>
+                              <p className="text-xs text-muted-foreground">Submitted: {proposal.submittedAt}</p>
+                            </div>
+                            <Badge variant={proposal.status === 'accepted' ? 'default' : 'secondary'} className="text-xs capitalize">
+                              {proposal.status}
+                            </Badge>
                           </div>
-                          <Badge variant={proposal.status === 'accepted' ? 'default' : 'secondary'} className="text-xs">
-                            {proposal.status}
-                          </Badge>
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1 font-medium text-foreground">
+                              <IndianRupee className="w-3 h-3 text-muted-foreground" />
+                              {proposal.budget}
+                            </span>
+                            <ChevronRight className="w-3 h-3" />
+                          </div>
                         </div>
-                        
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <IndianRupee className="w-3 h-3" />
-                            {proposal.budget}
-                          </span>
-                          <ChevronRight className="w-3 h-3" />
-                        </div>
-                      </div>
+                      </Link>
                     ))
                   ) : (
                     <div className="text-center py-6 text-muted-foreground">
@@ -464,8 +542,8 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                       <span className="text-foreground">College Verified</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <span className={(user.totalProjects || 0) > 0 ? "text-green-600" : "text-muted-foreground"}>
-                        {(user.totalProjects || 0) > 0 ? "✓" : "○"}
+                      <span className={((user.totalProjects || 0) > 0 || stats.completedJobs > 0) ? "text-green-600" : "text-muted-foreground"}>
+                        {((user.totalProjects || 0) > 0 || stats.completedJobs > 0) ? "✓" : "○"}
                       </span>
                       <span className="text-foreground">First Project Done</span>
                     </div>

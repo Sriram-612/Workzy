@@ -69,6 +69,14 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
           skills: response.user.skills,
           hourlyRate: response.user.hourlyRate,
           company: response.user.company,
+          collegeName: response.user.collegeName,
+          department: response.user.department,
+          bio: response.user.bio,
+          portfolio: response.user.portfolio,
+          responseRate: response.user.responseRate,
+          completionRate: response.user.completionRate,
+          totalProjects: response.user.totalProjects,
+          rating: response.user.rating,
         };
 
         toast.success('Welcome back!');
@@ -93,6 +101,8 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
           role: response.user.role.toLowerCase() as 'freelancer' | 'client',
           isProfileComplete: response.user.isProfileComplete,
           avatar: response.user.avatar,
+          rating: 0,
+          totalProjects: 0,
         };
 
         toast.success('Account created successfully!');

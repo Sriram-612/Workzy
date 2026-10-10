@@ -78,11 +78,15 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
 
         // Load project stats
         const statsResponse = await projectsAPI.getProjectStats();
+        const statsData = statsResponse.stats || {};
+        const projectsList = projectsResponse.projects || [];
+        const uniqueHired = statsData.hiredFreelancers ?? new Set(projectsList.map((p: any) => p.freelancer_id || p.freelancerId).filter(Boolean)).size;
+
         setStats({
-          amountDue: `₹${statsResponse.stats.totalEarnings || 0}`,
-          activeProjects: statsResponse.stats.activeProjects || 0,
-          completedProjects: statsResponse.stats.completedProjects || 0,
-          savedFreelancers: 0 // This would come from a separate API
+          amountDue: `₹${Number(statsData.totalInvested ?? statsData.totalEarnings ?? 0).toLocaleString('en-IN')}`,
+          activeProjects: Number(statsData.activeProjects || 0),
+          completedProjects: Number(statsData.completedProjects || 0),
+          savedFreelancers: uniqueHired
         });
 
         // Load notifications
@@ -448,14 +452,12 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-              <CardContent>
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <p>Real student profiles appear here after students complete their Workzy profiles.</p>
                   <Link to="/search-freelancers" className="block">
                     <Button size="sm" variant="outline" className="w-full">Browse All Freelancers</Button>
                   </Link>
                 </div>
-              </CardContent>
               </CardContent>
             </Card>
 
@@ -471,16 +473,16 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                     <span className="text-foreground">{postedJobs.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Average hire time</span>
-                    <span className="text-foreground">-</span>
+                    <span className="text-muted-foreground">Active projects</span>
+                    <span className="text-foreground">{stats.activeProjects}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Success rate</span>
-                    <span className="text-foreground">-</span>
+                    <span className="text-muted-foreground">Completed</span>
+                    <span className="text-foreground">{stats.completedProjects}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Saved freelancers</span>
-                    <span className="text-foreground">0</span>
+                    <span className="text-muted-foreground">Hired freelancers</span>
+                    <span className="text-foreground">{stats.savedFreelancers}</span>
                   </div>
                 </div>
               </CardContent>

@@ -37,11 +37,15 @@ export interface User {
   isCollegeVerified?: boolean;
   collegeName?: string;
   collegeEmail?: string;
+  department?: string;
+  bio?: string;
+  portfolio?: string[];
   isPortfolioVerified?: boolean;
   responseRate?: number; // Percentage 0-100
   completionRate?: number; // Percentage 0-100
   totalProjects?: number;
   onTimeDeliveryRate?: number; // Percentage 0-100
+  rating?: number;
 }
 
 export default function App() {
@@ -104,6 +108,14 @@ export default function App() {
               skills: response.user.skills,
               hourlyRate: response.user.hourlyRate,
               company: response.user.company,
+              collegeName: response.user.collegeName,
+              department: response.user.department,
+              bio: response.user.bio,
+              portfolio: response.user.portfolio,
+              responseRate: response.user.responseRate,
+              completionRate: response.user.completionRate,
+              totalProjects: response.user.totalProjects,
+              rating: response.user.rating,
             };
             setUser(user);
             // Update localStorage with fresh user data
