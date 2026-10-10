@@ -3,7 +3,6 @@ import { ArrowLeft, Calendar, Trophy, Users, Clock, Gift, Star, Target, Zap, Awa
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -17,134 +16,13 @@ interface EventsChallengesProps {
 export function EventsChallenges({ user, onBack }: EventsChallengesProps) {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
-  const ongoingEvents = [
-    {
-      id: 1,
-      title: "Winter Hackathon 2024",
-      type: "hackathon",
-      description: "Build innovative solutions for real-world problems in 48 hours",
-      startDate: "Dec 15, 2024",
-      endDate: "Dec 17, 2024",
-      participants: 1247,
-      maxParticipants: 2000,
-      prizes: ["₹50,000", "₹30,000", "₹20,000"],
-      skills: ["Web Development", "Mobile Apps", "AI/ML"],
-      status: "ongoing",
-      timeLeft: "2 days 14 hours",
-      organizer: "Workzy Community",
-      difficulty: "Advanced",
-      teamSize: "2-4 members",
-      registrationDeadline: "Dec 14, 2024"
-    },
-    {
-      id: 2,
-      title: "Logo Design Sprint",
-      type: "design-contest",
-      description: "Create stunning logos for startup brands in 7 days",
-      startDate: "Dec 10, 2024",
-      endDate: "Dec 17, 2024",
-      participants: 456,
-      maxParticipants: 1000,
-      prizes: ["₹15,000", "₹10,000", "₹5,000"],
-      skills: ["Logo Design", "Branding", "Adobe Illustrator"],
-      status: "ongoing",
-      timeLeft: "5 days 8 hours",
-      organizer: "Design Club",
-      difficulty: "Intermediate",
-      teamSize: "Individual",
-      registrationDeadline: "Dec 12, 2024"
-    }
-  ];
+  const ongoingEvents: any[] = [];
 
-  const upcomingEvents = [
-    {
-      id: 3,
-      title: "New Year Coding Challenge",
-      type: "coding-contest",
-      description: "Solve algorithmic problems and compete with the best coders",
-      startDate: "Jan 1, 2025",
-      endDate: "Jan 3, 2025",
-      participants: 0,
-      maxParticipants: 5000,
-      prizes: ["₹1,00,000", "₹60,000", "₹40,000"],
-      skills: ["Data Structures", "Algorithms", "Problem Solving"],
-      status: "upcoming",
-      timeLeft: "16 days",
-      organizer: "Coding Club",
-      difficulty: "Expert",
-      teamSize: "Individual",
-      registrationDeadline: "Dec 30, 2024"
-    },
-    {
-      id: 4,
-      title: "UI/UX Innovation Week",
-      type: "design-challenge",
-      description: "Redesign popular apps with innovative user experiences",
-      startDate: "Jan 15, 2025",
-      endDate: "Jan 22, 2025",
-      participants: 0,
-      maxParticipants: 1500,
-      prizes: ["₹35,000", "₹25,000", "₹15,000"],
-      skills: ["UI Design", "UX Research", "Prototyping"],
-      status: "upcoming",
-      timeLeft: "30 days",
-      organizer: "UX Guild",
-      difficulty: "Intermediate",
-      teamSize: "1-2 members",
-      registrationDeadline: "Jan 10, 2025"
-    }
-  ];
+  const upcomingEvents: any[] = [];
 
-  const pastEvents = [
-    {
-      id: 5,
-      title: "Autumn Code Fest",
-      type: "hackathon",
-      description: "Mobile app development competition",
-      startDate: "Nov 10, 2024",
-      endDate: "Nov 12, 2024",
-      participants: 2145,
-      winners: [
-        { name: "Team Phoenix", members: ["Arjun K.", "Priya S.", "Rohit M."], prize: "₹75,000" },
-        { name: "Code Warriors", members: ["Sneha R.", "Vikram S."], prize: "₹50,000" },
-        { name: "Digital Innovators", members: ["Karan J.", "Aisha K.", "Ravi P."], prize: "₹25,000" }
-      ],
-      status: "completed"
-    }
-  ];
+  const pastEvents: any[] = [];
 
-  const weeklyMissions = [
-    {
-      id: 1,
-      title: "First Client Success",
-      description: "Complete your first project with 5-star rating",
-      progress: 75,
-      reward: "₹500 bonus + Success Badge",
-      difficulty: "Beginner",
-      timeLeft: "3 days",
-      requirement: "1 project with 5-star rating"
-    },
-    {
-      id: 2,
-      title: "Speed Demon",
-      description: "Deliver 3 projects within 24 hours each",
-      progress: 33,
-      reward: "₹1,000 bonus + Speed Badge",
-      difficulty: "Intermediate", 
-      timeLeft: "5 days",
-      requirement: "1/3 fast deliveries completed"
-    },
-    {
-      id: 3,
-      title: "Community Helper",
-      description: "Help 5 students in discussion forum",
-      progress: 60,
-      reward: "₹300 bonus + Mentor Badge",
-      difficulty: "Easy",
-      timeLeft: "4 days",
-      requirement: "3/5 helpful answers"
-    }
-  ];
+  const weeklyMissions: any[] = [];
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
@@ -418,7 +296,13 @@ export function EventsChallenges({ user, onBack }: EventsChallengesProps) {
 
           <TabsContent value="ongoing" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {ongoingEvents.map((event) => (
+              {ongoingEvents.length === 0 ? (
+                <Card className="md:col-span-2">
+                  <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                    No live events yet. Events will appear here only after they are created in Workzy.
+                  </CardContent>
+                </Card>
+              ) : ongoingEvents.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
@@ -426,7 +310,13 @@ export function EventsChallenges({ user, onBack }: EventsChallengesProps) {
 
           <TabsContent value="upcoming" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {upcomingEvents.map((event) => (
+              {upcomingEvents.length === 0 ? (
+                <Card className="md:col-span-2">
+                  <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                    No upcoming events are scheduled yet.
+                  </CardContent>
+                </Card>
+              ) : upcomingEvents.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
@@ -434,7 +324,13 @@ export function EventsChallenges({ user, onBack }: EventsChallengesProps) {
 
           <TabsContent value="missions" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {weeklyMissions.map((mission) => (
+              {weeklyMissions.length === 0 ? (
+                <Card className="md:col-span-2 lg:col-span-3">
+                  <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                    Weekly missions will appear after real Workzy challenges are configured.
+                  </CardContent>
+                </Card>
+              ) : weeklyMissions.map((mission) => (
                 <Card key={mission.id}>
                   <CardContent className="p-6">
                     <div className="space-y-4">
@@ -482,7 +378,13 @@ export function EventsChallenges({ user, onBack }: EventsChallengesProps) {
           </TabsContent>
 
           <TabsContent value="past" className="space-y-6">
-            {pastEvents.map((event) => (
+            {pastEvents.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                  Past event results will appear after Workzy hosts real events.
+                </CardContent>
+              </Card>
+            ) : pastEvents.map((event) => (
               <Card key={event.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">

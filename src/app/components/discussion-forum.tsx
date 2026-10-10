@@ -24,100 +24,32 @@ export function DiscussionForum({ user, onBack }: DiscussionForumProps) {
   const [newPostCategory, setNewPostCategory] = useState('');
 
   const categories = [
-    { id: 'all', name: 'All Topics', count: 245, color: 'bg-gray-500' },
-    { id: 'freelancing-tips', name: 'Freelancing Tips', count: 67, color: 'bg-blue-500' },
-    { id: 'project-help', name: 'Project Help', count: 54, color: 'bg-green-500' },
-    { id: 'skill-development', name: 'Skill Development', count: 43, color: 'bg-purple-500' },
-    { id: 'career-advice', name: 'Career Advice', count: 38, color: 'bg-orange-500' },
-    { id: 'success-stories', name: 'Success Stories', count: 25, color: 'bg-yellow-500' },
-    { id: 'college-specific', name: 'College Specific', count: 18, color: 'bg-pink-500' }
+    { id: 'all', name: 'All Topics', count: 0, color: 'bg-gray-500' },
+    { id: 'freelancing-tips', name: 'Freelancing Tips', count: 0, color: 'bg-blue-500' },
+    { id: 'project-help', name: 'Project Help', count: 0, color: 'bg-green-500' },
+    { id: 'skill-development', name: 'Skill Development', count: 0, color: 'bg-purple-500' },
+    { id: 'career-advice', name: 'Career Advice', count: 0, color: 'bg-orange-500' },
+    { id: 'success-stories', name: 'Success Stories', count: 0, color: 'bg-yellow-500' },
+    { id: 'college-specific', name: 'College Specific', count: 0, color: 'bg-pink-500' }
   ];
 
-  const discussions = [
-    {
-      id: 1,
-      title: "How to price your first freelance project?",
-      content: "I'm a 2nd year CSE student and got my first potential client. They want a simple e-commerce website. How should I price it?",
-      author: "Rahul Kumar",
-      college: "IIT Delhi",
-      category: "freelancing-tips",
-      createdAt: "2 hours ago",
-      replies: 12,
-      upvotes: 24,
-      views: 156,
-      isPinned: false,
-      isSolved: false,
-      tags: ["pricing", "web-development", "beginner"]
-    },
-    {
-      id: 2,
-      title: "🎉 Just earned my first ₹10,000 on Workzy!",
-      content: "Started with small logo design projects 3 months ago. Today I completed a major branding project worth ₹10K. Here's my journey...",
-      author: "Priya Sharma",
-      college: "BITS Pilani",
-      category: "success-stories",
-      createdAt: "4 hours ago",
-      replies: 28,
-      upvotes: 89,
-      views: 423,
-      isPinned: true,
-      isSolved: false,
-      tags: ["milestone", "design", "success"]
-    },
-    {
-      id: 3,
-      title: "Looking for React.js mentor - willing to share earnings",
-      content: "I'm working on a complex React project for a client. Need guidance on state management and API integration. Happy to share 20% of project earnings.",
-      author: "Arjun Patel",
-      college: "NIT Trichy",
-      category: "project-help",
-      createdAt: "6 hours ago",
-      replies: 8,
-      upvotes: 15,
-      views: 92,
-      isPinned: false,
-      isSolved: true,
-      tags: ["react", "mentorship", "collaboration"]
-    },
-    {
-      id: 4,
-      title: "Which skills are most in-demand for college students?",
-      content: "Planning to learn new skills during summer break. What skills should I focus on to get more freelance opportunities?",
-      author: "Sneha Reddy",
-      college: "IIIT Hyderabad",
-      category: "skill-development",
-      createdAt: "8 hours ago",
-      replies: 34,
-      upvotes: 67,
-      views: 289,
-      isPinned: false,
-      isSolved: false,
-      tags: ["skills", "learning", "career"]
-    },
-    {
-      id: 5,
-      title: "VIT Vellore - Coding Club Hackathon winners announced!",
-      content: "Congratulations to all winners of our internal hackathon. Top 3 teams get direct access to premium client projects!",
-      author: "Rohit Mehta",
-      college: "VIT Vellore",
-      category: "college-specific",
-      createdAt: "1 day ago",
-      replies: 19,
-      upvotes: 45,
-      views: 167,
-      isPinned: false,
-      isSolved: false,
-      tags: ["hackathon", "vit", "announcement"]
-    }
-  ];
+  const discussions: {
+    id: number;
+    title: string;
+    content: string;
+    author: string;
+    college: string;
+    category: string;
+    createdAt: string;
+    replies: number;
+    upvotes: number;
+    views: number;
+    isPinned: boolean;
+    isSolved: boolean;
+    tags: string[];
+  }[] = [];
 
-  const trendingTopics = [
-    { tag: "web-development", posts: 34 },
-    { tag: "ui-ux-design", posts: 28 },
-    { tag: "pricing", posts: 22 },
-    { tag: "freelancing-tips", posts: 19 },
-    { tag: "client-communication", posts: 15 }
-  ];
+  const trendingTopics: { tag: string; posts: number }[] = [];
 
   const filteredDiscussions = discussions.filter(discussion => {
     const matchesSearch = discussion.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -254,14 +186,18 @@ export function DiscussionForum({ user, onBack }: DiscussionForumProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {trendingTopics.map((topic, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm">#{topic.tag}</span>
-                      <Badge variant="outline">{topic.posts}</Badge>
-                    </div>
-                  ))}
-                </div>
+                {trendingTopics.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No trending topics yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {trendingTopics.map((topic, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm">#{topic.tag}</span>
+                        <Badge variant="outline">{topic.posts}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -22,7 +22,6 @@ interface FreelancerDashboardProps {
   onLogout: () => void;
 }
 
-// Mock data - empty for new users
 const recentJobs: any[] = [];
 
 const recentProposals: any[] = [];
@@ -30,6 +29,13 @@ const recentProposals: any[] = [];
 export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps) {
   const [savedJobsList, setSavedJobsList] = useState<{ id: string; title?: string; category?: string }[]>([]);
   const [savedJobsLoading, setSavedJobsLoading] = useState(false);
+  const profileSteps = [
+    { label: 'Basic info added', complete: Boolean(user.name && user.email) },
+    { label: 'Skills listed', complete: Boolean(user.skills?.length) },
+    { label: 'Hourly rate added', complete: Boolean(user.hourlyRate) },
+    { label: 'Profile photo uploaded', complete: Boolean(user.avatar) },
+  ];
+  const profileStrength = Math.round((profileSteps.filter((step) => step.complete).length / profileSteps.length) * 100);
 
   useEffect(() => {
     if (user.role !== 'freelancer') return;
@@ -270,193 +276,23 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  🎯 Recommended Jobs for You
+                  Browse Live Jobs
                   <Link to="/browse-jobs" className="text-sm text-primary hover:underline">
                     Browse all jobs
                   </Link>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {/* Trending Categories */}
-                  <div className="mb-4">
-                    <h4 className="text-sm text-foreground mb-3 flex items-center gap-2">
-                      🔥 Hot Categories
-                      <Badge variant="secondary" className="text-xs">High Demand</Badge>
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Link to="/browse-jobs">
-                        <Card className="cursor-pointer hover:shadow-md transition-shadow bg-blue-50/50 dark:bg-blue-950/20 border-blue-200">
-                          <CardContent className="p-3 text-center">
-                            <div className="text-lg mb-1">⚛️</div>
-                            <p className="text-xs text-foreground font-medium">React Development</p>
-                            <p className="text-xs text-muted-foreground">150+ jobs</p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                      <Link to="/browse-jobs">
-                        <Card className="cursor-pointer hover:shadow-md transition-shadow bg-purple-50/50 dark:bg-purple-950/20 border-purple-200">
-                          <CardContent className="p-3 text-center">
-                            <div className="text-lg mb-1">🎨</div>
-                            <p className="text-xs text-foreground font-medium">UI/UX Design</p>
-                            <p className="text-xs text-muted-foreground">120+ jobs</p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                      <Link to="/browse-jobs">
-                        <Card className="cursor-pointer hover:shadow-md transition-shadow bg-green-50/50 dark:bg-green-950/20 border-green-200">
-                          <CardContent className="p-3 text-center">
-                            <div className="text-lg mb-1">✍️</div>
-                            <p className="text-xs text-foreground font-medium">Content Writing</p>
-                            <p className="text-xs text-muted-foreground">90+ jobs</p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                      <Link to="/browse-jobs">
-                        <Card className="cursor-pointer hover:shadow-md transition-shadow bg-orange-50/50 dark:bg-orange-950/20 border-orange-200">
-                          <CardContent className="p-3 text-center">
-                            <div className="text-lg mb-1">🎬</div>
-                            <p className="text-xs text-foreground font-medium">Video Editing</p>
-                            <p className="text-xs text-muted-foreground">80+ jobs</p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Perfect Match Jobs */}
-                  <div className="p-4 border border-border rounded-lg hover:bg-muted transition-colors bg-green-50/30 dark:bg-green-950/20 border-green-200">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="text-sm text-foreground mb-1">React Developer for E-commerce Platform</h4>
-                        <p className="text-xs text-muted-foreground">Client: TechCorp Solutions • Posted 2 hours ago</p>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                        Perfect Match
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Looking for an experienced React developer to build a modern e-commerce platform...
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                      <span className="flex items-center gap-1">
-                        <IndianRupee className="w-3 h-3" />
-                        ₹25,000 - ₹40,000
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        2-3 weeks
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        3 applicants
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      <Badge variant="secondary" className="text-xs">React</Badge>
-                      <Badge variant="secondary" className="text-xs">TypeScript</Badge>
-                      <Badge variant="secondary" className="text-xs">Node.js</Badge>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button size="sm" className="flex-1">Apply Now</Button>
-                      <Button size="sm" variant="outline">Save</Button>
-                    </div>
-                  </div>
-
-                  <div className="p-4 border border-border rounded-lg hover:bg-muted transition-colors bg-blue-50/30 dark:bg-blue-950/20 border-blue-200">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="text-sm text-foreground mb-1">Mobile App UI/UX Design</h4>
-                        <p className="text-xs text-muted-foreground">Client: StartupXYZ • Posted 5 hours ago</p>
-                      </div>
-                      <Badge variant="default" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                        Great Match
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Design intuitive user interfaces for our new fintech mobile application...
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                      <span className="flex items-center gap-1">
-                        <IndianRupee className="w-3 h-3" />
-                        ₹18,000 - ₹30,000
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        1-2 weeks
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        5 applicants
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      <Badge variant="secondary" className="text-xs">Figma</Badge>
-                      <Badge variant="secondary" className="text-xs">UI Design</Badge>
-                      <Badge variant="secondary" className="text-xs">Prototyping</Badge>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1">Apply Now</Button>
-                      <Button size="sm" variant="outline">Save</Button>
-                    </div>
-                  </div>
-
-                  <div className="p-4 border border-border rounded-lg hover:bg-muted transition-colors">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="text-sm text-foreground mb-1">Content Writing for Tech Blog</h4>
-                        <p className="text-xs text-muted-foreground">Client: TechMedia Inc • Posted 1 day ago</p>
-                      </div>
-                      <Badge variant="secondary">Good Match</Badge>
-                    </div>
-                    
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Write engaging technical articles for our developer-focused blog...
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                      <span className="flex items-center gap-1">
-                        <IndianRupee className="w-3 h-3" />
-                        ₹500 - ₹1,000/article
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Ongoing
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        12 applicants
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      <Badge variant="secondary" className="text-xs">Technical Writing</Badge>
-                      <Badge variant="secondary" className="text-xs">SEO</Badge>
-                      <Badge variant="secondary" className="text-xs">JavaScript</Badge>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1">Apply Now</Button>
-                      <Button size="sm" variant="outline">Save</Button>
-                    </div>
-                  </div>
-
-                  <div className="text-center py-4">
-                    <Link to="/browse-jobs">
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <Search className="w-4 h-4" />
-                        View All Job Opportunities
-                      </Button>
-                    </Link>
-                  </div>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Briefcase className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                  <p className="mb-2 text-foreground">No recommended jobs yet</p>
+                  <p className="text-sm mb-4">Workzy will only show jobs posted by real clients.</p>
+                  <Link to="/browse-jobs">
+                    <Button variant="outline" className="flex items-center gap-2 mx-auto">
+                      <Search className="w-4 h-4" />
+                      Browse Live Jobs
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -542,26 +378,16 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                 <div className="space-y-3">
                   <div className="flex justify-between text-xs mb-2">
                     <span className="text-foreground">Profile Strength</span>
-                    <span className="text-foreground">70%</span>
+                    <span className="text-foreground">{profileStrength}%</span>
                   </div>
-                  <Progress value={70} className="h-2" />
+                  <Progress value={profileStrength} className="h-2" />
                   <div className="space-y-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-muted-foreground">Basic info added</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-muted-foreground">Skills listed</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-muted-foreground">Add portfolio</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                      <span className="text-muted-foreground">Upload profile photo</span>
-                    </div>
+                    {profileSteps.map((step) => (
+                      <div key={step.label} className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${step.complete ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                        <span className="text-muted-foreground">{step.label}</span>
+                      </div>
+                    ))}
                   </div>
                   <Link to="/profile" className="block mt-3">
                     <Button size="sm" className="w-full">Complete Profile</Button>
@@ -627,8 +453,8 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                 <div className="space-y-3">
                   <div className="text-xs text-muted-foreground">
                     {user.isCollegeVerified
-                      ? "Complete your first project to unlock better opportunities"
-                      : "Verify your college email to get 3x more job invites"}
+                      ? "Complete your first project to unlock more profile signals"
+                      : "Verify your college email to show clients your student status"}
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs">
@@ -670,7 +496,7 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Profile views</span>
-                    <span className="text-foreground">12</span>
+                    <span className="text-foreground">0</span>
                   </div>
                 </div>
               </CardContent>
@@ -794,7 +620,7 @@ export function FreelancerDashboard({ user, onLogout }: FreelancerDashboardProps
                 <div>
                   <h3 className="font-medium text-foreground mb-2">Why Trust Matters</h3>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Verified students get 3x more job invitations</li>
+                    <li>• Verified student status helps clients evaluate your profile</li>
                     <li>• Higher response rates lead to better client relationships</li>
                     <li>• Complete your first 3 projects to unlock premium features</li>
                   </ul>

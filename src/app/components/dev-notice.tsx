@@ -15,7 +15,7 @@ export function DevNotice() {
     // Check backend connectivity
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:3001/health');
+        const response = await fetch('/health');
         if (response.ok) {
           setBackendStatus('connected');
         } else {

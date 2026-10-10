@@ -3,7 +3,7 @@ import { ArrowLeft, Trophy, Crown, Star, Zap, Target, Award, Medal, ChevronUp, C
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { User } from '../App';
@@ -17,152 +17,54 @@ export function CommunityLeaderboard({ user, onBack }: CommunityLeaderboardProps
   const [selectedPeriod, setSelectedPeriod] = useState('weekly');
 
   const badges = [
-    { id: 'gold-coder', name: 'Gold Coder', icon: '💻', requirement: '50+ coding projects', earned: true },
-    { id: 'design-pro', name: 'Design Pro', icon: '🎨', requirement: '25+ design projects', earned: true },
+    { id: 'gold-coder', name: 'Gold Coder', icon: '💻', requirement: '50+ coding projects', earned: false },
+    { id: 'design-pro', name: 'Design Pro', icon: '🎨', requirement: '25+ design projects', earned: false },
     { id: 'speed-demon', name: 'Speed Demon', icon: '⚡', requirement: 'Avg delivery < 2 days', earned: false },
     { id: 'mentor', name: 'Mentor', icon: '👨‍🏫', requirement: 'Help 10+ students', earned: false },
-    { id: 'innovator', name: 'Innovator', icon: '💡', requirement: 'Win 3+ challenges', earned: true },
+    { id: 'innovator', name: 'Innovator', icon: '💡', requirement: 'Win 3+ challenges', earned: false },
     { id: 'collaborator', name: 'Team Player', icon: '🤝', requirement: '10+ team projects', earned: false }
   ];
 
-  const weeklyLeaderboard = [
-    {
-      rank: 1,
-      name: "Arjun Kumar",
-      college: "IIT Delhi",
-      earnings: 15670,
-      projects: 8,
-      rating: 4.9,
-      trend: "up",
-      badges: ["gold-coder", "speed-demon"],
-      speciality: "Full Stack Development"
-    },
-    {
-      rank: 2,
-      name: "Priya Sharma",
-      college: "BITS Pilani",
-      earnings: 12450,
-      projects: 6,
-      rating: 4.8,
-      trend: "up",
-      badges: ["design-pro", "innovator"],
-      speciality: "UI/UX Design"
-    },
-    {
-      rank: 3,
-      name: "Rohit Mehta",
-      college: "NIT Trichy",
-      earnings: 11230,
-      projects: 7,
-      rating: 4.9,
-      trend: "down",
-      badges: ["gold-coder", "mentor"],
-      speciality: "Backend Development"
-    },
-    {
-      rank: 4,
-      name: "Sneha Reddy",
-      college: "IIIT Hyderabad",
-      earnings: 9890,
-      projects: 5,
-      rating: 4.7,
-      trend: "up",
-      badges: ["design-pro"],
-      speciality: "Mobile App Design"
-    },
-    {
-      rank: 5,
-      name: "Vikram Singh",
-      college: "VIT Vellore",
-      earnings: 8750,
-      projects: 4,
-      rating: 4.6,
-      trend: "same",
-      badges: ["collaborator"],
-      speciality: "Data Science"
-    }
-  ];
+  const weeklyLeaderboard: any[] = [];
 
-  const monthlyLeaderboard = [
-    {
-      rank: 1,
-      name: "Priya Sharma",
-      college: "BITS Pilani",
-      earnings: 45670,
-      projects: 22,
-      rating: 4.8,
-      trend: "up",
-      badges: ["design-pro", "innovator", "speed-demon"],
-      speciality: "UI/UX Design"
-    },
-    {
-      rank: 2,
-      name: "Arjun Kumar",
-      college: "IIT Delhi",
-      earnings: 43210,
-      projects: 28,
-      rating: 4.9,
-      trend: "down",
-      badges: ["gold-coder", "speed-demon", "mentor"],
-      speciality: "Full Stack Development"
-    },
-    {
-      rank: 3,
-      name: "Rohit Mehta",
-      college: "NIT Trichy",
-      earnings: 38950,
-      projects: 25,
-      rating: 4.9,
-      trend: "up",
-      badges: ["gold-coder", "mentor", "collaborator"],
-      speciality: "Backend Development"
-    }
-  ];
+  const monthlyLeaderboard: any[] = [];
 
   const skillLeaderboards = {
-    coding: [
-      { rank: 1, name: "Arjun Kumar", college: "IIT Delhi", projects: 28, rating: 4.9, earnings: 43210 },
-      { rank: 2, name: "Rohit Mehta", college: "NIT Trichy", projects: 25, rating: 4.9, earnings: 38950 },
-      { rank: 3, name: "Karan Joshi", college: "IIT Bombay", projects: 22, rating: 4.8, earnings: 35670 }
-    ],
-    design: [
-      { rank: 1, name: "Priya Sharma", college: "BITS Pilani", projects: 22, rating: 4.8, earnings: 45670 },
-      { rank: 2, name: "Sneha Reddy", college: "IIIT Hyderabad", projects: 18, rating: 4.7, earnings: 32450 },
-      { rank: 3, name: "Aisha Khan", college: "NID Ahmedabad", projects: 16, rating: 4.9, earnings: 29800 }
-    ]
+    coding: [] as any[],
+    design: [] as any[]
   };
 
   const achievements = [
     {
       title: "First Milestone",
-      description: "Earned your first ₹500",
+      description: "Complete your first paid project",
       icon: "🎯",
-      progress: 100,
-      requirement: "₹500",
+      progress: 0,
+      requirement: "0/1 projects",
       reward: "Welcome Badge"
     },
     {
       title: "Rising Star",
       description: "Complete 10 projects",
       icon: "⭐",
-      progress: 80,
-      requirement: "8/10 projects",
+      progress: 0,
+      requirement: "0/10 projects",
       reward: "Star Badge + ₹500 bonus"
     },
     {
       title: "Speed Delivery",
-      description: "Deliver 5 projects in 24 hours",
+      description: "Deliver 5 projects before their deadlines",
       icon: "⚡",
-      progress: 60,
-      requirement: "3/5 fast deliveries",
+      progress: 0,
+      requirement: "0/5 fast deliveries",
       reward: "Speed Demon Badge"
     },
     {
       title: "Perfect Rating",
-      description: "Maintain 4.8+ rating for 20 projects",
+      description: "Build a strong review history",
       icon: "💎",
-      progress: 45,
-      requirement: "9/20 projects with 4.8+",
+      progress: 0,
+      requirement: "0/20 reviewed projects",
       reward: "Diamond Badge + Premium features"
     }
   ];
@@ -243,7 +145,11 @@ export function CommunityLeaderboard({ user, onBack }: CommunityLeaderboardProps
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {getCurrentLeaderboard().map((student, index) => (
+                      {getCurrentLeaderboard().length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">
+                          Weekly rankings will appear after real student earnings and completed projects are recorded.
+                        </p>
+                      ) : getCurrentLeaderboard().map((student, index) => (
                         <div key={index} className={`p-4 rounded-lg border ${student.rank <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950' : ''}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -297,7 +203,11 @@ export function CommunityLeaderboard({ user, onBack }: CommunityLeaderboardProps
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {monthlyLeaderboard.map((student, index) => (
+                      {monthlyLeaderboard.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">
+                          Monthly rankings will appear after real student earnings and completed projects are recorded.
+                        </p>
+                      ) : monthlyLeaderboard.map((student, index) => (
                         <div key={index} className={`p-4 rounded-lg border ${student.rank <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950' : ''}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -350,7 +260,11 @@ export function CommunityLeaderboard({ user, onBack }: CommunityLeaderboardProps
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {skillLeaderboards.coding.map((student, index) => (
+                        {skillLeaderboards.coding.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-6">
+                            Coding rankings will appear after real completed projects.
+                          </p>
+                        ) : skillLeaderboards.coding.map((student, index) => (
                           <div key={index} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <span className={`font-bold ${getRankColor(student.rank)}`}>#{student.rank}</span>
@@ -380,7 +294,11 @@ export function CommunityLeaderboard({ user, onBack }: CommunityLeaderboardProps
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {skillLeaderboards.design.map((student, index) => (
+                        {skillLeaderboards.design.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-6">
+                            Design rankings will appear after real completed projects.
+                          </p>
+                        ) : skillLeaderboards.design.map((student, index) => (
                           <div key={index} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <span className={`font-bold ${getRankColor(student.rank)}`}>#{student.rank}</span>
@@ -419,19 +337,19 @@ export function CommunityLeaderboard({ user, onBack }: CommunityLeaderboardProps
               <CardContent>
                 <div className="text-center space-y-4">
                   <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto">
-                    <span className="text-xl font-bold">#23</span>
+                    <span className="text-xl font-bold">-</span>
                   </div>
                   <div>
                     <p className="font-semibold">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">Weekly Rank</p>
+                    <p className="text-sm text-muted-foreground">Not ranked yet</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <p className="text-lg font-bold text-green-600">₹4,560</p>
+                      <p className="text-lg font-bold text-green-600">₹0</p>
                       <p className="text-xs text-muted-foreground">Earned</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold">3</p>
+                      <p className="text-lg font-bold">0</p>
                       <p className="text-xs text-muted-foreground">Projects</p>
                     </div>
                   </div>

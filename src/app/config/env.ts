@@ -11,9 +11,15 @@ const getEnvVar = (key: string, fallback: string): string => {
   return fallback;
 };
 
+// In Vite dev, use same-origin `/api` (proxied to the backend) to avoid CORS and port mismatches.
+const defaultApiUrl =
+  typeof import.meta !== 'undefined' && import.meta.env?.DEV
+    ? '/api'
+    : 'http://localhost:3001/api';
+
 // Environment configuration for browser
 export const ENV = {
-  API_URL: getEnvVar('VITE_API_URL', 'http://localhost:3001/api'),
+  API_URL: getEnvVar('VITE_API_URL', defaultApiUrl),
   NODE_ENV: getEnvVar('VITE_NODE_ENV', 'development'),
   APP_NAME: getEnvVar('VITE_APP_NAME', 'Workzy'),
   VERSION: '1.0.0',

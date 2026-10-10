@@ -780,7 +780,7 @@ export function ClientDashboard({ user, onLogout }: ClientDashboardProps) {
                 <div className="text-2xl">💡</div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">Ready to hire skilled college students?</p>
-                  <p className="text-xs text-muted-foreground">Post your first job and get proposals from Student Profiles in 24 hours.</p>
+                  <p className="text-xs text-muted-foreground">Post your first job and receive proposals from real student profiles.</p>
                 </div>
                 <Link to="/post-job" className="ml-auto">
                   <Button size="sm">Post a Job</Button>

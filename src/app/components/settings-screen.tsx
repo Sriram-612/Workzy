@@ -436,21 +436,9 @@ export function SettingsScreen({ user, onLogout }: SettingsScreenProps) {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-6 bg-blue-600 rounded flex items-center justify-center">
-                            <span className="text-white text-xs">VISA</span>
-                          </div>
-                          <div>
-                            <h4 className="text-sm text-foreground">**** **** **** 4242</h4>
-                            <p className="text-xs text-muted-foreground">Expires 12/25</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge variant="secondary">Default</Badge>
-                          <Button variant="outline" size="sm">Edit</Button>
-                        </div>
-                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        No payment methods are saved yet.
+                      </p>
 
                       <Button variant="outline" className="w-full">
                         <Plus className="w-4 h-4 mr-2" />
@@ -466,15 +454,9 @@ export function SettingsScreen({ user, onLogout }: SettingsScreenProps) {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {[1, 2, 3].map(invoice => (
-                        <div key={invoice} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                          <div>
-                            <h4 className="text-sm text-foreground">Invoice #INV-{1000 + invoice}</h4>
-                            <p className="text-xs text-muted-foreground">January {invoice}, 2025 • ₹{999 * invoice}</p>
-                          </div>
-                          <Button variant="outline" size="sm">Download</Button>
-                        </div>
-                      ))}
+                      <p className="text-sm text-muted-foreground">
+                        Billing history will appear here after real payments are processed.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

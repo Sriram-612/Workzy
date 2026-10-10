@@ -68,12 +68,12 @@ const budgetRanges = [
 ];
 
 const trendingSkills = [
-  { name: 'React', demand: 'Very High', icon: '⚛️' },
-  { name: 'UI/UX Design', demand: 'Very High', icon: '🎨' },
-  { name: 'Video Editing', demand: 'High', icon: '🎬' },
-  { name: 'AI Integration', demand: 'Very High', icon: '🤖' },
-  { name: 'Content Writing', demand: 'High', icon: '✍️' },
-  { name: 'Full Stack', demand: 'High', icon: '💻' }
+  { name: 'React', icon: '⚛️' },
+  { name: 'UI/UX Design', icon: '🎨' },
+  { name: 'Video Editing', icon: '🎬' },
+  { name: 'AI Integration', icon: '🤖' },
+  { name: 'Content Writing', icon: '✍️' },
+  { name: 'Full Stack', icon: '💻' }
 ];
 
 export function BrowseJobs({ user }: BrowseJobsProps) {
@@ -203,7 +203,7 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
               Find Your Perfect Freelance Opportunity
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Browse thousands of jobs across 13 specialized categories
+              Browse live jobs across Workzy categories
             </p>
             
             {/* Quick Search */}
@@ -232,11 +232,8 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-orange-600" />
-                    <h3 className="text-lg text-foreground">🔥 Trending Skills</h3>
+                    <h3 className="text-lg text-foreground">Skill Areas</h3>
                   </div>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
-                    High Demand
-                  </Badge>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                   {trendingSkills.map((skill, index) => (
@@ -249,7 +246,6 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
                     >
                       <div className="text-2xl mb-1">{skill.icon}</div>
                       <p className="text-sm text-foreground font-medium">{skill.name}</p>
-                      <p className="text-xs text-muted-foreground">{skill.demand}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -306,11 +302,11 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Briefcase className="w-3 h-3" />
-                            <span>50+ jobs</span>
+                            <span>Live listings</span>
                           </div>
                           <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                             <Zap className="w-3 h-3" />
-                            <span>Active</span>
+                            <span>Browse</span>
                           </div>
                         </div>
                       </CardContent>
@@ -331,20 +327,20 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                   <div>
-                    <div className="text-2xl text-blue-600 dark:text-blue-400 mb-1">2,500+</div>
-                    <div className="text-sm text-muted-foreground">Active Jobs</div>
+                    <div className="text-2xl text-blue-600 dark:text-blue-400 mb-1">Live</div>
+                    <div className="text-sm text-muted-foreground">Job Listings</div>
                   </div>
                   <div>
-                    <div className="text-2xl text-green-600 dark:text-green-400 mb-1">15,000+</div>
-                    <div className="text-sm text-muted-foreground">Freelancers</div>
+                    <div className="text-2xl text-green-600 dark:text-green-400 mb-1">Real</div>
+                    <div className="text-sm text-muted-foreground">Student Profiles</div>
                   </div>
                   <div>
-                    <div className="text-2xl text-purple-600 dark:text-purple-400 mb-1">₹2.5Cr+</div>
-                    <div className="text-sm text-muted-foreground">Earnings</div>
+                    <div className="text-2xl text-purple-600 dark:text-purple-400 mb-1">API</div>
+                    <div className="text-sm text-muted-foreground">Backed Data</div>
                   </div>
                   <div>
-                    <div className="text-2xl text-orange-600 dark:text-orange-400 mb-1">4.8★</div>
-                    <div className="text-sm text-muted-foreground">Avg Rating</div>
+                    <div className="text-2xl text-orange-600 dark:text-orange-400 mb-1">Clean</div>
+                    <div className="text-sm text-muted-foreground">Launch Data</div>
                   </div>
                 </div>
               </CardContent>
@@ -482,12 +478,7 @@ export function BrowseJobs({ user }: BrowseJobsProps) {
               Showing {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''}
               {searchQuery && ` for "${searchQuery}"`}
             </p>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Users className="w-4 h-4" />
-                <span>50+ freelancers active</span>
-              </div>
-            </div>
+            <div />
           </div>
         </motion.div>
 

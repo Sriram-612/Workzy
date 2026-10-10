@@ -145,6 +145,11 @@ async function apiRequest<T>(
     return await response.json();
   } catch (error) {
     console.error('API Request Error:', error);
+    if (error instanceof TypeError && /fetch/i.test(error.message)) {
+      throw new Error(
+        'Cannot reach the Workzy API. Start the backend (npm run dev:backend from the project root, or npm run dev:all for frontend + API).'
+      );
+    }
     throw error instanceof Error ? error : new Error('Request failed');
   }
 }

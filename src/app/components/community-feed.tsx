@@ -20,127 +20,25 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
   const [newPostContent, setNewPostContent] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
 
-  const feedPosts = [
-    {
-      id: 1,
-      author: "Priya Sharma",
-      college: "BITS Pilani",
-      year: "3rd Year",
-      avatar: "",
-      timestamp: "2 hours ago",
-      type: "milestone",
-      content: "🎉 Just earned my first ₹10,000 on Workzy! Started with small logo design projects 3 months ago, and today I completed a major branding project worth ₹10K. The journey has been incredible - from learning design principles to understanding client requirements. Special thanks to the Design Club for all the support! 💪",
-      images: ["/project-showcase-1.jpg", "/project-showcase-2.jpg"],
-      likes: 89,
-      comments: 23,
-      shares: 12,
-      isLiked: false,
-      tags: ["milestone", "design", "branding"],
-      projectDetails: {
-        title: "Complete Brand Identity for Tech Startup",
-        client: "TechFlow Solutions",
-        duration: "2 weeks",
-        skills: ["Logo Design", "Brand Guidelines", "Web Design"]
-      }
-    },
-    {
-      id: 2,
-      author: "Arjun Kumar",
-      college: "IIT Delhi", 
-      year: "4th Year",
-      avatar: "",
-      timestamp: "5 hours ago",
-      type: "project",
-      content: "Just wrapped up an amazing full-stack e-commerce project! Built with React, Node.js, and MongoDB. The client was super happy with the payment integration and admin dashboard. Already got a referral for another project! 🚀",
-      images: ["/ecommerce-project.jpg"],
-      likes: 67,
-      comments: 18,
-      shares: 8,
-      isLiked: true,
-      tags: ["web-development", "full-stack", "ecommerce"],
-      projectDetails: {
-        title: "E-commerce Platform for Local Business",
-        client: "Fashion Hub Delhi",
-        duration: "3 weeks",
-        skills: ["React", "Node.js", "MongoDB", "Stripe Integration"]
-      }
-    },
-    {
-      id: 3,
-      author: "Sneha Reddy",
-      college: "IIIT Hyderabad",
-      year: "2nd Year",
-      avatar: "",
-      timestamp: "1 day ago",
-      type: "achievement",
-      content: "Won 2nd place in the Winter Hackathon! Our team built an AI-powered study buddy app that helps students with personalized learning paths. 48 hours of coding, debugging, and lots of coffee ☕. The ₹30,000 prize money is just the cherry on top - the learning experience was priceless!",
-      images: ["/hackathon-team.jpg", "/app-demo.jpg"],
-      likes: 134,
-      comments: 31,
-      shares: 24,
-      isLiked: false,
-      tags: ["hackathon", "ai", "mobile-app", "teamwork"],
-      projectDetails: {
-        title: "AI Study Buddy Mobile App",
-        client: "Winter Hackathon 2024",
-        duration: "48 hours",
-        skills: ["Flutter", "Python", "Machine Learning", "Firebase"]
-      }
-    },
-    {
-      id: 4,
-      author: "Rohit Mehta",
-      college: "NIT Trichy",
-      year: "4th Year",
-      avatar: "",
-      timestamp: "2 days ago",
-      type: "tip",
-      content: "Pro tip for fellow freelancers: Always ask for 50% payment upfront! Learned this the hard way after a client ghosted me. Also, use project management tools like Trello to keep clients updated on progress. Communication is key! 🔑",
-      images: [],
-      likes: 156,
-      comments: 45,
-      shares: 67,
-      isLiked: true,
-      tags: ["freelancing-tips", "client-management", "payment"],
-      projectDetails: null
-    },
-    {
-      id: 5,
-      author: "Aisha Khan",
-      college: "VIT Vellore",
-      year: "3rd Year", 
-      avatar: "",
-      timestamp: "3 days ago",
-      type: "collaboration",
-      content: "Looking for a backend developer to collaborate on a fintech project! I've got the UI/UX ready and a potential client interested. Revenue sharing 60-40. Must know Node.js and have experience with payment gateways. DM me if interested! 🤝",
-      images: ["/fintech-mockup.jpg"],
-      likes: 43,
-      comments: 29,
-      shares: 15,
-      isLiked: false,
-      tags: ["collaboration", "fintech", "ui-ux", "backend"],
-      projectDetails: {
-        title: "Fintech Mobile App Design",
-        client: "Potential client in talks",
-        duration: "1 month estimated",
-        skills: ["UI/UX Design", "Figma", "User Research"]
-      }
-    }
-  ];
+  const feedPosts: {
+    id: number;
+    author: string;
+    college: string;
+    year: string;
+    type: string;
+    content: string;
+    images: string[];
+    likes: number;
+    comments: number;
+    shares: number;
+    isLiked: boolean;
+    tags: string[];
+    timestamp: string;
+    projectDetails: Record<string, unknown> | null;
+  }[] = [];
 
-  const trendingTopics = [
-    { tag: "freelancing-tips", posts: 45 },
-    { tag: "web-development", posts: 38 },
-    { tag: "ui-ux-design", posts: 32 },
-    { tag: "milestone", posts: 28 },
-    { tag: "collaboration", posts: 24 }
-  ];
-
-  const suggestedConnections = [
-    { name: "Karan Joshi", college: "IIT Bombay", commonConnections: 5, skills: ["React", "Node.js"] },
-    { name: "Pooja Singh", college: "DTU Delhi", commonConnections: 3, skills: ["UI/UX", "Figma"] },
-    { name: "Vikram Sharma", college: "BITS Goa", commonConnections: 7, skills: ["Python", "Data Science"] }
-  ];
+  const trendingTopics: { tag: string; posts: number }[] = [];
+  const suggestedConnections: { name: string; college: string; commonConnections: number; skills: string[] }[] = [];
 
   const getPostTypeIcon = (type: string) => {
     switch (type) {
@@ -278,6 +176,17 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
     </Card>
   );
 
+  const renderPostList = (posts: typeof feedPosts) => {
+    if (posts.length === 0) {
+      return (
+        <p className="text-center py-12 text-muted-foreground">
+          No posts yet. Be the first to share your freelancing journey!
+        </p>
+      );
+    }
+    return posts.map((post) => <PostCard key={post.id} post={post} />);
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto">
@@ -361,27 +270,25 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
               </TabsList>
 
               <TabsContent value="all" className="space-y-6">
-                {feedPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+                {renderPostList(feedPosts)}
               </TabsContent>
 
               <TabsContent value="following" className="space-y-6">
-                {feedPosts.filter(post => ['Priya Sharma', 'Arjun Kumar'].includes(post.author)).map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+                {renderPostList([])}
               </TabsContent>
 
               <TabsContent value="my-college" className="space-y-6">
-                {feedPosts.filter(post => post.college === user.company || post.college.includes('IIT')).map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+                {renderPostList(
+                  feedPosts.filter(
+                    (post) =>
+                      user.collegeName &&
+                      post.college.toLowerCase() === user.collegeName.toLowerCase()
+                  )
+                )}
               </TabsContent>
 
               <TabsContent value="trending" className="space-y-6">
-                {feedPosts.filter(post => post.likes > 100).map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+                {renderPostList([...feedPosts].sort((a, b) => b.likes - a.likes))}
               </TabsContent>
             </Tabs>
           </div>
@@ -397,14 +304,18 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {trendingTopics.map((topic, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm">#{topic.tag}</span>
-                      <Badge variant="outline">{topic.posts} posts</Badge>
-                    </div>
-                  ))}
-                </div>
+                {trendingTopics.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Topics will appear as students post.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {trendingTopics.map((topic, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm">#{topic.tag}</span>
+                        <Badge variant="outline">{topic.posts} posts</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -414,6 +325,11 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
                 <CardTitle className="text-lg">Suggested Connections</CardTitle>
               </CardHeader>
               <CardContent>
+                {suggestedConnections.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Suggestions will appear as more students join your college hub.
+                  </p>
+                ) : (
                 <div className="space-y-4">
                   {suggestedConnections.map((connection, index) => (
                     <div key={index} className="space-y-2">
@@ -446,6 +362,7 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
                     </div>
                   ))}
                 </div>
+                )}
               </CardContent>
             </Card>
 
@@ -458,19 +375,19 @@ export function CommunityFeed({ user, onBack }: CommunityFeedProps) {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Profile Views</span>
-                    <span className="font-semibold">247</span>
+                    <span className="font-semibold">0</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Post Likes</span>
-                    <span className="font-semibold">156</span>
+                    <span className="font-semibold">0</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Connections</span>
-                    <span className="font-semibold">43</span>
+                    <span className="font-semibold">0</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Posts Shared</span>
-                    <span className="font-semibold">8</span>
+                    <span className="font-semibold">0</span>
                   </div>
                 </div>
               </CardContent>

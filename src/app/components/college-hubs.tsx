@@ -18,90 +18,30 @@ export function CollegeHubs({ user, onBack }: CollegeHubsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollege, setSelectedCollege] = useState<any>(null);
 
-  const collegeHubs = [
-    {
-      id: 1,
-      name: "Indian Institute of Technology Delhi",
-      shortName: "IIT Delhi",
-      location: "New Delhi",
-      students: 1247,
-      totalEarnings: 2456780,
-      monthlyEarnings: 345670,
-      rank: 1,
-      badge: "🏆",
-      verificationRequired: true,
-      domains: ["iitd.ac.in"],
-      topSkills: ["Web Development", "Machine Learning", "Mobile Apps"],
-      recentAchievements: ["Won National Hackathon", "50+ Projects Completed", "₹10L+ Total Earnings"]
-    },
-    {
-      id: 2,
-      name: "Birla Institute of Technology and Science",
-      shortName: "BITS Pilani",
-      location: "Pilani, Rajasthan",
-      students: 892,
-      totalEarnings: 1893450,
-      monthlyEarnings: 234580,
-      rank: 2,
-      badge: "🥈",
-      verificationRequired: true,
-      domains: ["pilani.bits-pilani.ac.in"],
-      topSkills: ["Software Development", "Data Science", "UI/UX Design"],
-      recentAchievements: ["Top Design Team", "100+ Successful Projects", "₹18L+ Total Earnings"]
-    },
-    {
-      id: 3,
-      name: "National Institute of Technology Trichy",
-      shortName: "NIT Trichy",
-      location: "Tiruchirappalli, Tamil Nadu",
-      students: 756,
-      totalEarnings: 1567890,
-      monthlyEarnings: 198340,
-      rank: 3,
-      badge: "🥉",
-      verificationRequired: true,
-      domains: ["nitt.edu"],
-      topSkills: ["Backend Development", "DevOps", "Cybersecurity"],
-      recentAchievements: ["Security Challenge Winners", "₹15L+ Earnings", "Top Backend Hub"]
-    },
-    {
-      id: 4,
-      name: "International Institute of Information Technology",
-      shortName: "IIIT Hyderabad",
-      location: "Hyderabad, Telangana",
-      students: 623,
-      totalEarnings: 1234560,
-      monthlyEarnings: 167890,
-      rank: 4,
-      badge: "⭐",
-      verificationRequired: true,
-      domains: ["iiit.ac.in"],
-      topSkills: ["AI/ML", "Research", "Full Stack"],
-      recentAchievements: ["AI Innovation Award", "Research Excellence", "₹12L+ Earnings"]
-    },
-    {
-      id: 5,
-      name: "Vellore Institute of Technology",
-      shortName: "VIT Vellore",
-      location: "Vellore, Tamil Nadu",
-      students: 534,
-      totalEarnings: 987650,
-      monthlyEarnings: 145230,
-      rank: 5,
-      badge: "💎",
-      verificationRequired: true,
-      domains: ["vit.ac.in"],
-      topSkills: ["Mobile Development", "Cloud Computing", "Game Development"],
-      recentAchievements: ["Mobile App Contest", "Cloud Migration Expert", "₹9L+ Earnings"]
-    }
-  ];
+  const collegeHubs: {
+    id: number;
+    name: string;
+    shortName: string;
+    location: string;
+    students: number;
+    totalEarnings: number;
+    monthlyEarnings: number;
+    rank: number;
+    badge: string;
+    verificationRequired: boolean;
+    domains: string[];
+    topSkills: string[];
+    recentAchievements: string[];
+  }[] = [];
 
-  const topPerformers = [
-    { name: "Arjun Kumar", year: "3rd Year", branch: "CSE", earnings: 45670, projects: 12, rating: 4.9 },
-    { name: "Priya Sharma", year: "2nd Year", branch: "ECE", earnings: 38900, projects: 8, rating: 4.8 },
-    { name: "Rohit Mehta", year: "4th Year", branch: "IT", earnings: 52340, projects: 15, rating: 4.9 },
-    { name: "Sneha Reddy", year: "3rd Year", branch: "CSE", earnings: 41200, projects: 10, rating: 4.7 }
-  ];
+  const topPerformers: {
+    name: string;
+    year: string;
+    branch: string;
+    earnings: number;
+    projects: number;
+    rating: number;
+  }[] = [];
 
   const filteredColleges = collegeHubs.filter(college =>
     college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -207,7 +147,7 @@ export function CollegeHubs({ user, onBack }: CollegeHubsProps) {
                       {selectedCollege.topSkills.map((skill: string, index: number) => (
                         <div key={index} className="flex items-center justify-between">
                           <span>{skill}</span>
-                          <Badge variant="secondary">{Math.floor(Math.random() * 100) + 50}+ students</Badge>
+                          <Badge variant="secondary">Live members only</Badge>
                         </div>
                       ))}
                     </div>

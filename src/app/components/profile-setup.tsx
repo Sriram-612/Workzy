@@ -157,7 +157,7 @@ export function ProfileSetup({ user, onComplete }: ProfileSetupProps) {
             <div className="text-center">
               <h2 className="text-xl mb-2">Verify Your College</h2>
               <p className="text-gray-600">This helps build trust with clients</p>
-              <Badge variant="secondary" className="mt-2">✓ Verified students get 3x more jobs</Badge>
+              <Badge variant="secondary" className="mt-2">✓ Verification helps clients trust your profile</Badge>
             </div>
 
             <div className="space-y-4">
@@ -167,7 +167,7 @@ export function ProfileSetup({ user, onComplete }: ProfileSetupProps) {
                   id="collegeName"
                   value={formData.collegeName}
                   onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
-                  placeholder="e.g., IIT Delhi, BITS Pilani, etc."
+                  placeholder="Your college or university"
                 />
               </div>
 
@@ -187,7 +187,7 @@ export function ProfileSetup({ user, onComplete }: ProfileSetupProps) {
 
               <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  💡 Why verify? Verified students have higher response rates and earn more on average.
+                  💡 Why verify? Verification helps clients confirm your student status before hiring.
                 </p>
               </div>
             </div>

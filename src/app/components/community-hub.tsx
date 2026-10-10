@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Users, Trophy, BookOpen, Calendar, MessageSquare, Star, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { User } from '../App';
@@ -16,34 +16,23 @@ interface CommunityHubProps {
 
 export function CommunityHub({ user, onBack, onNavigate }: CommunityHubProps) {
   const [stats, setStats] = useState({
-    totalStudents: 12453,
-    activeColleges: 847,
-    skillClubs: 24,
-    weeklyEarnings: 2847500,
-    completedProjects: 3421
+    totalStudents: 0,
+    activeColleges: 0,
+    skillClubs: 4,
+    weeklyEarnings: 0,
+    completedProjects: 0
   });
 
-  const topColleges = [
-    { name: "IIT Delhi", students: 1247, earnings: 345670, badge: "🏆" },
-    { name: "BITS Pilani", students: 892, earnings: 234580, badge: "🥈" },
-    { name: "NIT Trichy", students: 756, earnings: 198340, badge: "🥉" },
-    { name: "IIIT Hyderabad", students: 623, earnings: 167890, badge: "⭐" },
-    { name: "VIT Vellore", students: 534, earnings: 145230, badge: "💎" }
-  ];
+  const topColleges: { name: string; students: number; earnings: number; badge: string }[] = [];
 
   const featuredSkillClubs = [
-    { name: "Coding Club", members: 3421, color: "bg-blue-500", icon: "💻" },
-    { name: "Design Club", members: 1876, color: "bg-purple-500", icon: "🎨" },
-    { name: "Marketing Club", members: 1234, color: "bg-green-500", icon: "📊" },
-    { name: "Tutoring Club", members: 2145, color: "bg-orange-500", icon: "📚" }
+    { name: "Coding Club", color: "bg-blue-500", icon: "💻" },
+    { name: "Design Club", color: "bg-purple-500", icon: "🎨" },
+    { name: "Marketing Club", color: "bg-green-500", icon: "📊" },
+    { name: "Tutoring Club", color: "bg-orange-500", icon: "📚" }
   ];
 
-  const recentActivity = [
-    { user: "Arjun K.", college: "IIT Delhi", action: "Won Design Challenge", amount: "₹15,000", time: "2 hours ago" },
-    { user: "Priya S.", college: "BITS Pilani", action: "Completed Tutoring Session", amount: "₹800", time: "4 hours ago" },
-    { user: "Rohit M.", college: "NIT Trichy", action: "Delivered Web Project", amount: "₹12,500", time: "6 hours ago" },
-    { user: "Sneha R.", college: "IIIT Hyderabad", action: "First Earning Milestone", amount: "₹500", time: "1 day ago" }
-  ];
+  const recentActivity: { user: string; college: string; action: string; amount: string; time: string }[] = [];
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -208,7 +197,7 @@ export function CommunityHub({ user, onBack, onNavigate }: CommunityHubProps) {
                         <div className="text-2xl">{club.icon}</div>
                         <div>
                           <h4 className="font-semibold">{club.name}</h4>
-                          <p className="text-sm text-muted-foreground">{club.members.toLocaleString()} members</p>
+                          <p className="text-sm text-muted-foreground">Members appear after students join</p>
                         </div>
                       </div>
                       <Button size="sm" className="w-full">Join Club</Button>
@@ -227,7 +216,11 @@ export function CommunityHub({ user, onBack, onNavigate }: CommunityHubProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {topColleges.map((college, index) => (
+                  {topColleges.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      College hub rankings will appear after real students join and complete projects.
+                    </p>
+                  ) : topColleges.map((college, index) => (
                     <div key={index} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 cursor-pointer">
                       <div className="flex items-center gap-4">
                         <div className="text-2xl">{college.badge}</div>
@@ -261,17 +254,17 @@ export function CommunityHub({ user, onBack, onNavigate }: CommunityHubProps) {
                       <div className="text-2xl">{club.icon}</div>
                       {club.name}
                     </CardTitle>
-                    <CardDescription>{club.members.toLocaleString()} active members</CardDescription>
+                    <CardDescription>Open for verified students</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-between text-sm">
                         <span>Active Projects</span>
-                        <span className="font-semibold">{Math.floor(club.members * 0.1)}</span>
+                        <span className="font-semibold">0</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Avg. Weekly Earnings</span>
-                        <span className="font-semibold text-green-600">₹{(club.members * 2.5).toLocaleString()}</span>
+                        <span className="font-semibold text-green-600">₹0</span>
                       </div>
                       <Button className="w-full">Join {club.name}</Button>
                     </div>
@@ -292,7 +285,11 @@ export function CommunityHub({ user, onBack, onNavigate }: CommunityHubProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
+                  {recentActivity.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Live activity will appear after real projects, posts, and milestones happen on Workzy.
+                    </p>
+                  ) : recentActivity.map((activity, index) => (
                     <div key={index} className="flex items-center justify-between p-4 rounded-lg border">
                       <div className="flex items-center gap-3">
                         <Avatar className="w-10 h-10">

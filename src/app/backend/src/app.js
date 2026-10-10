@@ -9,7 +9,20 @@ const { errorHandler } = require('./middleware/errorHandler');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.frontendUrl, credentials: true }));
+
+const corsOrigin =
+  env.nodeEnv === 'development'
+    ? (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
+          return callback(null, true);
+        }
+        if (origin === env.frontendUrl) return callback(null, true);
+        return callback(new Error('Not allowed by CORS'));
+      }
+    : env.frontendUrl;
+
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '10mb' }));

@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -22,122 +22,11 @@ export function MentorshipConnect({ user, onBack }: MentorshipConnectProps) {
   const [collegeFilter, setCollegeFilter] = useState('all');
   const [requestMessage, setRequestMessage] = useState('');
 
-  const availableMentors = [
-    {
-      id: 1,
-      name: "Rajesh Kumar",
-      title: "Senior Software Engineer",
-      company: "Google",
-      college: "IIT Delhi",
-      graduationYear: "2019",
-      currentRole: "Alumni",
-      expertise: ["Full Stack Development", "System Design", "Career Guidance"],
-      experience: "5+ years",
-      mentees: 12,
-      rating: 4.9,
-      responseTime: "< 2 hours",
-      pricePerSession: 1500,
-      availability: "Weekends",
-      bio: "Passionate about helping students transition from college to tech industry. Specialized in FAANG interview preparation.",
-      achievements: ["Led 10+ projects at Google", "Mentored 50+ students", "Tech Speaker"],
-      sessionCount: 150
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      title: "Product Designer",
-      company: "Figma",
-      college: "BITS Pilani",
-      graduationYear: "2020",
-      currentRole: "Alumni",
-      expertise: ["UI/UX Design", "Product Strategy", "Design Systems"],
-      experience: "4+ years",
-      mentees: 8,
-      rating: 4.8,
-      responseTime: "< 4 hours",
-      pricePerSession: 1200,
-      availability: "Evenings",
-      bio: "Product designer with expertise in building design systems. Love helping students discover their design potential.",
-      achievements: ["Redesigned Figma mobile app", "Design team lead", "Design mentor"],
-      sessionCount: 85
-    },
-    {
-      id: 3,
-      name: "Arjun Patel",
-      title: "Final Year Student",
-      company: "NIT Trichy",
-      college: "NIT Trichy",
-      graduationYear: "2024",
-      currentRole: "Senior Student",
-      expertise: ["Competitive Programming", "DSA", "Placement Preparation"],
-      experience: "3+ years coding",
-      mentees: 15,
-      rating: 4.7,
-      responseTime: "< 1 hour",
-      pricePerSession: 500,
-      availability: "Daily",
-      bio: "Top competitive programmer with multiple internship offers. Helping juniors with coding and placement preparation.",
-      achievements: ["ACM ICPC finalist", "Google Summer of Code", "Multiple internships"],
-      sessionCount: 200
-    },
-    {
-      id: 4,
-      name: "Dr. Sneha Reddy",
-      title: "Research Scientist",
-      company: "Microsoft Research",
-      college: "IIIT Hyderabad",
-      graduationYear: "2018",
-      currentRole: "Alumni",
-      expertise: ["Machine Learning", "Research", "PhD Guidance"],
-      experience: "6+ years",
-      mentees: 6,
-      rating: 4.9,
-      responseTime: "< 6 hours",
-      pricePerSession: 2000,
-      availability: "Weekends",
-      bio: "PhD in ML with 20+ publications. Helping students navigate research and higher studies.",
-      achievements: ["20+ research papers", "Microsoft Research Award", "PhD mentor"],
-      sessionCount: 45
-    }
-  ];
+  const availableMentors: any[] = [];
 
-  const myMentorships = [
-    {
-      mentor: "Rajesh Kumar",
-      sessions: 3,
-      nextSession: "Dec 18, 2024 at 2:00 PM",
-      topic: "System Design Interview Prep",
-      status: "active"
-    },
-    {
-      mentor: "Priya Sharma", 
-      sessions: 2,
-      nextSession: "Dec 20, 2024 at 6:00 PM",
-      topic: "Portfolio Review",
-      status: "active"
-    }
-  ];
+  const myMentorships: any[] = [];
 
-  const mentorRequests = [
-    {
-      mentee: "Rohit Mehta",
-      college: "VIT Vellore",
-      year: "2nd Year",
-      topic: "Web Development Career Path",
-      message: "Hi, I'm interested in learning web development and would love guidance on building projects.",
-      status: "pending",
-      requestedAt: "2 hours ago"
-    },
-    {
-      mentee: "Aisha Khan",
-      college: "DTU Delhi",
-      year: "3rd Year", 
-      topic: "Freelancing Tips",
-      message: "Looking for mentorship on how to get started with freelancing while in college.",
-      status: "pending",
-      requestedAt: "1 day ago"
-    }
-  ];
+  const mentorRequests: any[] = [];
 
   const filteredMentors = availableMentors.filter(mentor => {
     const matchesSearch = mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -150,8 +39,8 @@ export function MentorshipConnect({ user, onBack }: MentorshipConnectProps) {
     return matchesSearch && matchesSkill && matchesCollege;
   });
 
-  const skillOptions = ['all', 'Web Development', 'UI/UX Design', 'Machine Learning', 'Competitive Programming', 'System Design'];
-  const collegeOptions = ['all', 'IIT Delhi', 'BITS Pilani', 'NIT Trichy', 'IIIT Hyderabad', 'VIT Vellore'];
+  const skillOptions = ['all'];
+  const collegeOptions = ['all'];
 
   const MentorCard = ({ mentor }: { mentor: any }) => (
     <Card className="hover:shadow-md transition-shadow">
