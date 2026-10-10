@@ -11,11 +11,8 @@ const getEnvVar = (key: string, fallback: string): string => {
   return fallback;
 };
 
-// In Vite dev, use same-origin `/api` (proxied to the backend) to avoid CORS and port mismatches.
-const defaultApiUrl =
-  typeof import.meta !== 'undefined' && import.meta.env?.DEV
-    ? '/api'
-    : 'http://localhost:3001/api';
+// Use same-origin `/api` which works seamlessly with Vite dev proxy and Vercel serverless functions.
+const defaultApiUrl = '/api';
 
 // Environment configuration for browser
 export const ENV = {

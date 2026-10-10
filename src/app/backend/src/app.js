@@ -10,17 +10,16 @@ const app = express();
 
 app.use(helmet());
 
-const corsOrigin =
-  env.nodeEnv === 'development'
-    ? (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
-          return callback(null, true);
-        }
-        if (origin === env.frontendUrl) return callback(null, true);
-        return callback(new Error('Not allowed by CORS'));
-      }
-    : env.frontendUrl;
+const corsOrigin = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
+    return callback(null, true);
+  }
+  if (origin.endsWith('.vercel.app') || origin === env.frontendUrl) {
+    return callback(null, true);
+  }
+  return callback(null, true);
+};
 
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
@@ -29,9 +28,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-app.get('/health', (req, res) => {
+const healthHandler = (req, res) => {
   res.json({ status: 'OK', message: 'Workzy API Server is running', timestamp: new Date().toISOString() });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
